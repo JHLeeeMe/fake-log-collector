@@ -1,7 +1,7 @@
 """log_generator.py
 
 Fake Log Generator
-  (Nginx, Apache, ...)
+  (Nginx, Apache, Flask, ...)
 
 Attributes:
     fake: Faker
@@ -11,10 +11,12 @@ Classes:
     LogElements
 
 Functions:
-    gen_nginx_log() -> None
-    gen_apache_log() -> None
+    gen_nginx_log() -> str
+    gen_apache_log() -> str
+    gen_flask_log() -> str:
 
 """
+import os
 import time
 import random
 from datetime import datetime
@@ -108,6 +110,29 @@ def gen_apache_log(format: str = 'combined') -> str:
     return log
 
 
+def gen_flask_log() -> str:
+    """Flask Log Generator
+
+    Flask access log generator
+
+    default format (version >= 1.0):
+        [%(asctime)s] %(levelname)s in %(module)s: %(message)s [in %(pathname)s:%(lineno)d]
+      e.g.
+        [2022-12-14 12:34:56] ERROR in app: An error occurred while processing a request [in /path/to/app.py:123]
+
+    """
+    app_name = random.choice(seq=['app1', 'app2', 'app3'])
+    log_level = random.choice(seq=['INFO', 'WARN', 'ERROR', 'DEBUG'])
+    log = f'[{log_elem.time_local}] {log_level} in {app_name}: '
+    if log_level == 'ERROR':
+        log += f'An error occurred while processing a request '
+    else:
+        log += f'{fake.street_address()} '
+    log +=  f'[in {os.path.dirname(__file__)}/{app_name}.py:{random.randint(1, 500)}]'
+
+    return log
+
+
 if __name__ == '__main__':
     while True:
         print('----------- Nginx -----------')
@@ -119,6 +144,13 @@ if __name__ == '__main__':
         fake_apache_log = gen_apache_log(format='combined')
         print(fake_apache_log)
         log_elem.refresh()
+
+        print('----------- Flask -----------')
+        fake_flask_log = gen_flask_log()
+        print(fake_flask_log)
+        log_elem.refresh()
+
+        print()
 
         time.sleep(1)
 
