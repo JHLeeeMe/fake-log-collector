@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  ######################
+  # fake-log-collector #
+  ######################
+  fake-log-collector:
+    image: jhleeeme/fake-log-collector:latest
+    container_name: fake-log-collector
+    hostname: fake-log-collector
+    stdin_open: true # -i option
+    tty: true        # -t option
+    volumes:
+      - .:/workspace/
+    depends_on:
+      - master
+      - kafka-single-node
+    networks:
+      net:
+        ipv4_address: 10.0.0.10
+
+
+  ##########
+  # HADOOP #
+  ##########
+  master:
+    image: jhleeeme/hadoop:3.2.1-ubuntu18.04
+    container_name: master
+    hostname: master
+    stdin_open: true # -i option
+    tty: true        # -t option
+      #volumes:
+      #  - .:/root/fake-log-collector/.
+    environment:
+      - WORKER_NUM=3
+    depends_on:
+      - worker-1
+      - worker-2
+      - worker-3
+    networks:
+      net:
+        ipv4_address: 10.0.0.20
+
+  worker-1:
+    image: jhleeeme/hadoop:3.2.1-ubuntu18.04
+    container_name: worker-1
+    hostname: worker-1
+    stdin_open: true # -i option
+    tty: true        # -t option
+    networks:
+      net:
+        ipv4_address: 10.0.0.21
+
+  worker-2:
+    image: jhleeeme/hadoop:3.2.1-ubuntu18.04
+    container_name: worker-2
+    hostname: worker-2
+    stdin_open: true # -i option
+    tty: true        # -t option
+    networks:
+      net:
+        ipv4_address: 10.0.0.22
+
+  worker-3:
+    image: jhleeeme/hadoop:3.2.1-ubuntu18.04
+    container_name: worker-3
+    hostname: worker-3
+    stdin_open: true # -i option
+    tty: true        # -t option
+    networks:
+      net:
+        ipv4_address: 10.0.0.23
+
+  #########
+  # KAFKA #
+  #########
+  kafka-single-node:
+    image: jhleeeme/kafka-single-node:2.13-3.1.1-alpine
+    container_name: kafka-single-node
+    hostname: kafka-single-node
+    restart: always
+    #environment:
+    #  - CREATE_TOPICS=iot,words
+    networks:
+      net:
+        ipv4_address: 10.0.0.30
+
+#  ##############
+#  # POSTGRESQL #
+#  ##############
+#  postgres:
+#    image: postgres:latest
+#    container_name: postgresql
+#    hostname: postgresql
+#    restart: always
+#    environment:
+#      - POSTGRES_USER=scott
+#      - POSTGRES_PASSWORD=tiger
+#      - POSTGRES_HOST_AUTH_METHOD=trust
+#      - POSTGRES_DB=pipeline_db
+#    networks:
+#      net:
+#        ipv4_address: 10.0.0.40
+#
+#  ###########
+#  # GRAFANA #
+#  ###########
+#  grafana:
+#    image: grafana/grafana:latest
+#    container_name: grafana
+#    hostname: grafana
+#    restart: always
+#    ports:
+#      - 3000:3000
+#    environment:
+#      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
+#    depends_on:
+#      - postgres
+#      - kafka-single-node
+#    networks:
+#      net:
+#        ipv4_address: 10.0.0.50
+
+############
+# Networks #
+############
+networks:
+  net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+    #external: true

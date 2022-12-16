@@ -23,7 +23,7 @@ from datetime import datetime
 
 from pytz import timezone
 from faker import Faker
-
+from kafka import KafkaProducer
 
 fake = Faker()
 
@@ -134,20 +134,25 @@ def gen_flask_log() -> str:
 
 
 if __name__ == '__main__':
+    producer = KafkaProducer(bootstrap_servers=['kafka-single-node:9092'])
+
     while True:
         print('----------- Nginx -----------')
         fake_nginx_log = gen_nginx_log()
-        print(fake_nginx_log)
+        producer.send('raw', bytes(fake_nginx_log, encoding='utf8'))
+        print('send data to "raw" topic')
         log_elem.refresh()
 
         print('----------- Apache -----------')
         fake_apache_log = gen_apache_log(format='combined')
-        print(fake_apache_log)
+        producer.send('raw', bytes(fake_apache_log, encoding='utf8'))
+        print('send data to "raw" topic')
         log_elem.refresh()
 
         print('----------- Flask -----------')
         fake_flask_log = gen_flask_log()
-        print(fake_flask_log)
+        producer.send('raw', bytes(fake_flask_log, encoding='utf8'))
+        print('send data to "raw" topic')
         log_elem.refresh()
 
         print()
