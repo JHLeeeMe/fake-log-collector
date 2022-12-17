@@ -1,43 +1,34 @@
 from kafka import KafkaConsumer
 
+import configs
 
-#if __name__ == '__main__':
-#    consumer = KafkaConsumer(
-#        'raw',
-#        group_id='test-consumer-group',
-#        bootstrap_servers=['kafka-single-node:9092'],
-#        auto_offset_reset='earliest',
-#        enable_auto_commit=True,
-#        # consumer_timeout_ms=1000
-#    )
-#
-#    for message in consumer:
-#        message = message.value.decode('utf8')
-#        print(message)
-#
-#    while True:
-#        messages = consumer.poll(timeout_ms=1000)
-#        for message in messages:
-#            print(message)
+
+# 'raw' topic delete.retention.ms = 1 hour
+configs.alter_retention_policy(topic='raw', hour=1)
+
 
 if __name__ == '__main__':
-    consumer1 = KafkaConsumer(group_id='test-consumers',
-                              bootstrap_servers=['kafka-single-node:9092'],
-                              auto_offset_reset='earliest',
-                              enable_auto_commit=True)
-    consumer2 = KafkaConsumer(group_id='test-consumers',
-                              bootstrap_servers=['kafka-single-node:9092'],
-                              auto_offset_reset='earliest',
-                              enable_auto_commit=True)
+    consumer = KafkaConsumer(
+        'raw',
+        group_id='test-consumer-group',
+        bootstrap_servers=['kafka-single-node:9092'],
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        # consumer_timeout_ms=1000
+    )
 
-    consumer1.subscribe(['raw'])
-    consumer2.subscribe(['raw'])
+    for consumer_record in consumer:
+        key = consumer_record.key.decode('utf8')
+        value = consumer_record.value.decode('utf8')
+        print(f'Key: {key}')
+        print(f'Value: {value[:90]}...')
 
-    while True:
-        messages1 = consumer1.poll()
-        for message in messages1:
-            print("Consumer 1:", message.topic, message.partition, message.offset, message.key, message.value)
+#    while True:
+#        batch_data = consumer.poll()
+#        for topic_partition, consumer_records in batch_data.items():
+#            for consumer_record in consumer_records:
+#                print(consumer_record)
+#                print(consumer_record.key)
+#                print(f'Offset: {consumer_record.offset}')
+#                print(f'Message: {consumer_record.value.decode("utf8")[:90]}...')
 
-        messages2 = consumer2.poll()
-        for message in messages2:
-            print("Consumer 2:", message.topic, message.partition, message.offset, message.key, message.value)
