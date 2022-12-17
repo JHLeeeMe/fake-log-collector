@@ -53,7 +53,7 @@ def _init_logger():
     global logger
 
     os.makedirs('./logs/', exist_ok=True)
-    logger = logging.getLogger('transaction')
+    logger = logging.getLogger('error_detector')
     logger.setLevel(logging.INFO)
 
     log_handler = handlers.TimedRotatingFileHandler(
