@@ -9,11 +9,12 @@ Attributes:
 
 Classes:
     LogElements
+        A class to store fake data created using Faker().
 
 Functions:
     gen_nginx_log() -> str
     gen_apache_log() -> str
-    gen_flask_log() -> str:
+    gen_flask_log() -> str
 
 """
 import os
@@ -25,6 +26,9 @@ from pytz import timezone
 from faker import Faker
 from kafka import KafkaProducer
 
+import utils
+
+logger = utils.get_logger()
 fake = Faker()
 
 
@@ -69,7 +73,7 @@ def gen_nginx_log() -> str:
     combined format:
         '$remote_addr - $remote_user [$time_local] '
         '"$request" '$status $body_bytes_sent '
-        '"$http_referer" "$http_user_agent"';
+        '"$http_referer" "$http_user_agent"'
       e.g.
         192.168.0.250 - - [29/Apr/2017:02:17:41 +0900]
         "GET / HTTP/1.1" 200 396
@@ -100,7 +104,6 @@ def gen_apache_log(format: str = 'combined') -> str:
         127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 "http://www.example.com/start.html" "Mozilla/4.08 [en] (Win98; I ;Nav)"
 
     """
-
     log = f'{log_elem.remote_addr} - {log_elem.remote_user} [{log_elem.time_local}] ' \
           f'"{log_elem.request}" {log_elem.status} {log_elem.body_bytes_sent}'
 
@@ -121,41 +124,58 @@ def gen_flask_log() -> str:
         [2022-12-14 12:34:56] ERROR in app: An error occurred while processing a request [in /path/to/app.py:123]
 
     """
-    app_name = random.choice(seq=['app1', 'app2', 'app3'])
-    log_level = random.choice(seq=['INFO', 'WARN', 'ERROR', 'DEBUG'])
-    log = f'[{log_elem.time_local}] {log_level} in {app_name}: '
-    if log_level == 'ERROR':
-        log += f'An error occurred while processing a request '
+    asctime = datetime.now(tz=timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
+    module = random.choice(seq=['app1', 'app2', 'app3'])
+    levelname = random.choice(seq=['INFO', 'WARN', 'ERROR', 'DEBUG'])
+    if levelname == 'ERROR':
+        message = f'An error occurred while processing a request '
     else:
-        log += f'{fake.street_address()} '
-    log +=  f'[in {os.path.dirname(__file__)}/{app_name}.py:{random.randint(1, 500)}]'
+        message = f'{fake.street_address()} '
+
+    log = f'[{asctime}] {levelname} in {module}: {message} ' \
+          f'[in {os.path.dirname(__file__)}/{module}.py:{random.randint(1, 500)}]'
 
     return log
 
 
 if __name__ == '__main__':
-    producer = KafkaProducer(bootstrap_servers=['kafka-single-node:9092'])
+    producer: KafkaProducer | None = None
+    for i in range(5):
+        try:
+            producer = KafkaProducer(bootstrap_servers=['kafka-single-node:9092'])
+        except Exception as e:
+            if i == 0 or i == 4:
+                logger.error(f'retry {i+1}: {e}')
+            time.sleep(3)
+            continue
 
-    while True:
-        print('----------- Nginx -----------')
-        fake_nginx_log = gen_nginx_log()
-        producer.send('raw', bytes(fake_nginx_log, encoding='utf8'))
-        print('send data to "raw" topic')
-        log_elem.refresh()
+    if producer is None:
+        logger.error('Kafka Producer is None.')
+        exit()
 
-        print('----------- Apache -----------')
-        fake_apache_log = gen_apache_log(format='combined')
-        producer.send('raw', bytes(fake_apache_log, encoding='utf8'))
-        print('send data to "raw" topic')
-        log_elem.refresh()
+    try:
+        while True:
+            fake_nginx_log = gen_nginx_log()
+            producer.send('raw',
+                          key=b'nginx',value=bytes(fake_nginx_log, encoding='utf8'))
+            log_elem.refresh()
 
-        print('----------- Flask -----------')
-        fake_flask_log = gen_flask_log()
-        producer.send('raw', bytes(fake_flask_log, encoding='utf8'))
-        print('send data to "raw" topic')
-        log_elem.refresh()
+            fake_apache_log = gen_apache_log(format='combined')
+            producer.send('raw',
+                          key=b'apache', value=bytes(fake_apache_log, encoding='utf8'))
+            log_elem.refresh()
 
-        print()
+            fake_flask_log = gen_flask_log()
+            producer.send('raw',
+                          key=b'flask', value=bytes(fake_flask_log, encoding='utf8'))
 
-        time.sleep(1)
+            print(f'{os.getpid()}(pid): log send to "raw" topic.')
+
+            time.sleep(1)
+    except KeyboardInterrupt:
+        producer.flush()
+        producer.close()
+    except Exception as e:
+        logger.error(e)
+        exit()
 
