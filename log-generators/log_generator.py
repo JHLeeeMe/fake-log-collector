@@ -142,7 +142,7 @@ if __name__ == '__main__':
             producer = KafkaProducer(bootstrap_servers=['kafka-single-node:9092'])
         except Exception as e:
             if i == 0 or i == 4:
-                logger.error(f'try {i+1}: {e}')
+                logger.error(f'retry {i+1}: {e}')
             time.sleep(3)
             continue
 
