@@ -9,11 +9,12 @@ Attributes:
 
 Classes:
     LogElements
+        A class to store fake data created using Faker().
 
 Functions:
     gen_nginx_log() -> str
     gen_apache_log() -> str
-    gen_flask_log() -> str:
+    gen_flask_log() -> str
 
 """
 import os
@@ -123,14 +124,16 @@ def gen_flask_log() -> str:
         [2022-12-14 12:34:56] ERROR in app: An error occurred while processing a request [in /path/to/app.py:123]
 
     """
-    app_name = random.choice(seq=['app1', 'app2', 'app3'])
-    log_level = random.choice(seq=['INFO', 'WARN', 'ERROR', 'DEBUG'])
-    log = f'[{log_elem.time_local}] {log_level} in {app_name}: '
-    if log_level == 'ERROR':
-        log += f'An error occurred while processing a request '
+    asctime = datetime.now(tz=timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
+    module = random.choice(seq=['app1', 'app2', 'app3'])
+    levelname = random.choice(seq=['INFO', 'WARN', 'ERROR', 'DEBUG'])
+    if levelname == 'ERROR':
+        message = f'An error occurred while processing a request '
     else:
-        log += f'{fake.street_address()} '
-    log +=  f'[in {os.path.dirname(__file__)}/{app_name}.py:{random.randint(1, 500)}]'
+        message = f'{fake.street_address()} '
+
+    log = f'[{asctime}] {levelname} in {module}: {message} ' \
+          f'[in {os.path.dirname(__file__)}/{module}.py:{random.randint(1, 500)}]'
 
     return log
 
@@ -150,20 +153,29 @@ if __name__ == '__main__':
         logger.error('Kafka Producer is None.')
         exit()
 
-    while True:
-        fake_nginx_log = gen_nginx_log()
-        producer.send('raw', bytes(fake_nginx_log, encoding='utf8'))
-        log_elem.refresh()
+    try:
+        while True:
+            fake_nginx_log = gen_nginx_log()
+            producer.send('raw',
+                          key=b'nginx',value=bytes(fake_nginx_log, encoding='utf8'))
+            log_elem.refresh()
 
-        fake_apache_log = gen_apache_log(format='combined')
-        producer.send('raw', bytes(fake_apache_log, encoding='utf8'))
-        log_elem.refresh()
+            fake_apache_log = gen_apache_log(format='combined')
+            producer.send('raw',
+                          key=b'apache', value=bytes(fake_apache_log, encoding='utf8'))
+            log_elem.refresh()
 
-        fake_flask_log = gen_flask_log()
-        producer.send('raw', bytes(fake_flask_log, encoding='utf8'))
-        log_elem.refresh()
+            fake_flask_log = gen_flask_log()
+            producer.send('raw',
+                          key=b'flask', value=bytes(fake_flask_log, encoding='utf8'))
 
-        print(f'{os.getpid()}(pid): log send to "raw" topic.')
+            print(f'{os.getpid()}(pid): log send to "raw" topic.')
 
-        time.sleep(1)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        producer.flush()
+        producer.close()
+    except Exception as e:
+        logger.error(e)
+        exit()
 
