@@ -29,8 +29,8 @@ services:
     hostname: master
     stdin_open: true # -i option
     tty: true        # -t option
-      #volumes:
-      #  - .:/root/fake-log-collector/.
+    volumes:
+      - .tmpfs/:/tmpfs
     environment:
       - WORKER_NUM=3
     depends_on:
@@ -47,6 +47,8 @@ services:
     hostname: worker-1
     stdin_open: true # -i option
     tty: true        # -t option
+    volumes:
+      - .tmpfs/:/tmpfs
     networks:
       net:
         ipv4_address: 10.0.0.21
@@ -57,6 +59,8 @@ services:
     hostname: worker-2
     stdin_open: true # -i option
     tty: true        # -t option
+    volumes:
+      - .tmpfs/:/tmpfs
     networks:
       net:
         ipv4_address: 10.0.0.22
@@ -67,6 +71,8 @@ services:
     hostname: worker-3
     stdin_open: true # -i option
     tty: true        # -t option
+    volumes:
+      - .tmpfs/:/tmpfs
     networks:
       net:
         ipv4_address: 10.0.0.23
@@ -81,6 +87,8 @@ services:
     restart: always
     #environment:
     #  - CREATE_TOPICS=iot,words
+    volumes:
+      - .tmpfs/:/tmpfs
     networks:
       net:
         ipv4_address: 10.0.0.30
