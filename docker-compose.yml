@@ -85,6 +85,8 @@ services:
     container_name: kafka-single-node
     hostname: kafka-single-node
     restart: always
+    stdin_open: true # -i option
+    tty: true        # -t option
     #environment:
     #  - CREATE_TOPICS=iot,words
     volumes:
