@@ -5,8 +5,8 @@ echo "Starting zookeeper"
 zookeeper-server-start.sh -daemon /opt/kafka/config/zookeeper.properties
 
 echo "Starting kafka"
-kafka-server-start.sh /opt/kafka/config/server.properties
-#kafka-server-start.sh -daemon /opt/kafka/config/server.properties
+#kafka-server-start.sh /opt/kafka/config/server.properties
+kafka-server-start.sh -daemon /opt/kafka/config/server.properties
 
 echo "Health checking..."
 for i in $(seq 1 10); do
@@ -20,9 +20,5 @@ for i in $(seq 1 10); do
     sleep 2
 done
 
-#echo "Creating topics"
-#/etc/create-topics.sh
-#unset CREATE_TOPICS
-
-# exec /bin/bash
-#/bin/bash
+echo "$(hostname -f): exec /bin/bash"
+/bin/bash
