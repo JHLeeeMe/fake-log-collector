@@ -87,8 +87,6 @@ services:
     restart: always
     stdin_open: true # -i option
     tty: true        # -t option
-    #environment:
-    #  - CREATE_TOPICS=iot,words
     volumes:
       - .tmpfs/:/tmpfs
     networks:

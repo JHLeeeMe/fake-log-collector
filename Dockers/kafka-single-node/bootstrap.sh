@@ -5,7 +5,6 @@ echo "Starting zookeeper"
 zookeeper-server-start.sh -daemon /opt/kafka/config/zookeeper.properties
 
 echo "Starting kafka"
-#kafka-server-start.sh /opt/kafka/config/server.properties
 kafka-server-start.sh -daemon /opt/kafka/config/server.properties
 
 echo "Health checking..."
@@ -19,6 +18,8 @@ for i in $(seq 1 10); do
     fi
     sleep 2
 done
+
+echo "alias ll='ls -alF'" >> /root/.bashrc
 
 echo "$(hostname -f): exec /bin/bash"
 /bin/bash
