@@ -1,11 +1,5 @@
 from kafka import KafkaConsumer
 
-import configs
-
-
-# 'raw' topic delete.retention.ms = 1 hour
-configs.alter_retention_policy(topic='raw', hour=1)
-
 
 if __name__ == '__main__':
     consumer = KafkaConsumer(

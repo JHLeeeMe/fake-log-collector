@@ -27,6 +27,7 @@ from faker import Faker
 from kafka import KafkaProducer
 
 import utils
+import configs
 
 logger = utils.get_logger()
 fake = Faker()
@@ -139,6 +140,12 @@ def gen_flask_log() -> str:
 
 
 if __name__ == '__main__':
+    # Create 'raw' topic
+    #   retention.ms: 1 hour,
+    #   delete.retention.ms = 0.5 hour
+    #   retention.bytes: 5GB
+    configs.create_topic(topic='raw', num_partitions=3, replica=1)
+
     producer: KafkaProducer | None = None
     for i in range(5):
         try:
