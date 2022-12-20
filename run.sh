@@ -2,7 +2,8 @@
 
 
 if [[ -d ./tmpfs ]]; then
-    rm -rf ./tmpfs
+    echo "exec: sudo rm -rf ./tmpfs"
+    sudo rm -rf ./tmpfs
 fi
 
 CMD=$1
