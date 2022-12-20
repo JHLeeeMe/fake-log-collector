@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
 
+echo "alias ll='ls -alF'" >> /root/.bashrc
+
 if [[ ! -e .tmpfs/health_check.txt ]]; then
     touch .tmpfs/health_check.txt
 fi
 
-echo "Hadoop health checking..."
+echo "Health checking..."
 for i in $(seq 1 10); do
     # master: ResourceManager, NameNode
-    # worker-1: NodeManager, SecondaryNameNode, DataNode
+    # worker-1: NodeManager, DataNode, SecondaryNameNode
     # worker-2: NodeManager, DataNode
     # worker-3: NodeManager, DataNode
-    if [[ $(cat .tmpfs/health_check.txt |wc -l) -ge 9 ]]; then
+    # kafka-single-node: Kafka, QuorumPeerMain
+    if [[ $(cat .tmpfs/health_check.txt |wc -l) -ge 11 ]]; then
         rm -rf .tmpfs/
         break
     elif [[ $i == 10 ]]; then
@@ -27,6 +30,3 @@ pip install -r ./src/python/log-generators/requirements.txt
 
 echo "exec log_generator.py"
 python ./src/python/log-generators/log_generator.py
-
-# exec /bin/bash
-#/bin/bash
