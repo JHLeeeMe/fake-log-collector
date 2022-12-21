@@ -20,6 +20,7 @@ Functions:
 import os
 import time
 import random
+import threading
 from datetime import datetime
 
 from pytz import timezone
@@ -134,9 +135,30 @@ def gen_flask_log() -> str:
         message = f'{fake.street_address()} '
 
     log = f'[{asctime}] {levelname} in {module}: {message} ' \
-          f'[in {os.path.dirname(__file__)}/{module}.py:{random.randint(1, 500)}]'
+          f'[in /workspace/./src/python/log-generators/{module}.py:{random.randint(1, 500)}]'
 
     return log
+
+
+def send_to_topic(producer: KafkaProducer, key: str, topic: str = 'raw'):
+    assert (key in ['nginx', 'apache', 'flask'])
+    assert (topic in ['raw'])
+
+    while True:
+        if key == 'nginx':
+            fake_log = gen_nginx_log()
+            log_elem.refresh()
+        elif key == 'apache':
+            fake_log = gen_apache_log(format='combined')
+            log_elem.refresh()
+        else:
+            fake_log = gen_flask_log()
+
+        producer.send(topic,
+                      key=bytes(key, 'utf8'), value=bytes(fake_log, 'utf8'))
+
+        print(f'{os.getpid()}(pid): log send to "{topic}" topic.')
+        time.sleep(random.uniform(0.1, 3))
 
 
 if __name__ == '__main__':
@@ -160,25 +182,13 @@ if __name__ == '__main__':
         logger.error('Kafka Producer is None.')
         exit()
 
+    thread_pool = []
+    for e in ['nginx', 'apache', 'flask']:
+        thread_pool.append(threading.Thread(target=send_to_topic, args=(producer, e, 'raw')))
+
     try:
-        while True:
-            fake_nginx_log = gen_nginx_log()
-            producer.send('raw',
-                          key=b'nginx',value=bytes(fake_nginx_log, encoding='utf8'))
-            log_elem.refresh()
-
-            fake_apache_log = gen_apache_log(format='combined')
-            producer.send('raw',
-                          key=b'apache', value=bytes(fake_apache_log, encoding='utf8'))
-            log_elem.refresh()
-
-            fake_flask_log = gen_flask_log()
-            producer.send('raw',
-                          key=b'flask', value=bytes(fake_flask_log, encoding='utf8'))
-
-            print(f'{os.getpid()}(pid): log send to "raw" topic.')
-
-            time.sleep(1)
+        for t in thread_pool:
+            t.start()
     except KeyboardInterrupt:
         producer.flush()
         producer.close()
