@@ -13,8 +13,11 @@ Classes:
 
 Functions:
     gen_nginx_log() -> str
-    gen_apache_log() -> str
+    gen_apache_log(format: str = 'combined') -> str
     gen_flask_log() -> str
+
+    send_to_topic(producer: KafkaProducer, key: str, topic: str = 'raw') -> NoReturn
+        for threading
 
 """
 import os
@@ -23,12 +26,13 @@ import random
 import threading
 from datetime import datetime
 
-from pytz import timezone
 from faker import Faker
+from pytz import timezone
 from kafka import KafkaProducer
 
 import utils
 import configs
+
 
 logger = utils.get_logger()
 fake = Faker()
