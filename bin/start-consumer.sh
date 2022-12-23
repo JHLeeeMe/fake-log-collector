@@ -11,13 +11,15 @@ PROJECT_ROOT=/workspace
 JAVA_ROOT=$PROJECT_ROOT/src/java
 JARS=$JAVA_ROOT/jars
 
-if [[ ! -d ./src/java/target/ ]]; then
-    echo "compile TestConsumer.java"
-    javac \
-        -cp $JAVA_ROOT/jars/kafka-clients-3.3.1.jar \
-        -d $JAVA_ROOT/target/ \
-        $JAVA_ROOT/TestConsumer.java
+if [[ -d ./src/java/target/ ]]; then
+    rm -rf $JAVA_ROOT/target
 fi
+
+echo "compile TestConsumer.java"
+javac \
+    -cp $JARS/kafka-clients-3.3.1.jar \
+    -d $JAVA_ROOT/target/ \
+    $JAVA_ROOT/TestConsumer.java
 
 echo "exec TestConsumer"
 java \
