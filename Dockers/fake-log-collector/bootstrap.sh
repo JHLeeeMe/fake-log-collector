@@ -25,8 +25,4 @@ for i in $(seq 1 10); do
     sleep 3
 done
 
-echo "pip installing..."
-pip install -r ./src/python/log-generators/requirements.txt
-
-echo "exec log_generator.py"
-python ./src/python/log-generators/log_generator.py
+./bin/start-producer.sh
