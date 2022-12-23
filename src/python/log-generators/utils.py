@@ -53,7 +53,6 @@ def _init_logger():
     global logger
 
     output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
-    print(output_path)
     os.makedirs(output_path, exist_ok=True)
     logger = logging.getLogger('error_detector')
     logger.setLevel(logging.INFO)
