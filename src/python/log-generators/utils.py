@@ -52,12 +52,14 @@ def get_logger() -> logging.Logger:
 def _init_logger():
     global logger
 
-    os.makedirs('./logs/', exist_ok=True)
+    output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
+    print(output_path)
+    os.makedirs(output_path, exist_ok=True)
     logger = logging.getLogger('error_detector')
     logger.setLevel(logging.INFO)
 
     log_handler = handlers.TimedRotatingFileHandler(
-        filename='./logs/error.log', when='midnight', encoding='utf-8'
+        filename=f'{output_path}/error.log', when='midnight', encoding='utf-8'
     )
     log_formatter = logging.Formatter(
         '[%(asctime)s - %(levelname)s] %(message)s'
@@ -66,3 +68,4 @@ def _init_logger():
     log_handler.suffix = '-%Y%m%d'
 
     logger.addHandler(log_handler)
+
