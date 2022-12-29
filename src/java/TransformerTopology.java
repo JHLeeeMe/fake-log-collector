@@ -1,3 +1,5 @@
+import java.util.Map;
+
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.KeyValue;
@@ -21,27 +23,29 @@ public class TransformerTopology {
 
     private String transform(String key, String value) {
         String retVal = "";
-        String[] fields = value.split(" ");
+        Map<String, String> fieldMap;
         switch (key) {
             case "nginx":
-                for (String field : fields) {
-                    retVal += ("|---nginx---|" + field);
-                }
+                fieldMap = LogSplitter.nginxSplit(value);
                 break;
             case "apache":
-                for (String field : fields) {
-                    retVal += ("|---apache---|" + field);
-                }
+                fieldMap = LogSplitter.apacheSplit("combined", value);
                 break;
             case "flask":
-                for (String field : fields) {
-                    retVal += ("|---flask---|" + field);
-                }
+                fieldMap = LogSplitter.flaskSplit(value);
                 break;
             default:
-                System.out.println("default");
-                break;
+                System.out.println("######### transform() error.");
+                return "######### transform() error.";
         }
+
+        System.out.println(String.format("------- %s Log -------", key));
+        System.out.println(value);
+        for (String k : fieldMap.keySet()) {
+            System.out.println("\t" + k + ": " + fieldMap.get(k));
+            retVal += (fieldMap.get(k));
+        }
+
         return retVal;
     }
 }
