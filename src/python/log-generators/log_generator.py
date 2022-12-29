@@ -78,7 +78,7 @@ def gen_nginx_log() -> str:
 
     combined format:
         '$remote_addr - $remote_user [$time_local] '
-        '"$request" '$status $body_bytes_sent '
+        '"$request" $status $body_bytes_sent '
         '"$http_referer" "$http_user_agent"'
       e.g.
         192.168.0.250 - - [29/Apr/2017:02:17:41 +0900]
