@@ -42,7 +42,7 @@ class LogElements:
     def __init__(self):
         self.remote_addr = fake.ipv4()
         self.remote_user = random.choice(seq=['-', fake.last_name()])
-        self.time_local = datetime.now(tz=timezone('Asia/Seoul')).strftime('%d/%b/%Y:%H:%M:%S %z')
+        self.time_local = datetime.now(tz=timezone('Asia/Seoul')).strftime('%Y-%m-%dT%H:%M:%S%z')
         self.method = random.choice(seq=['GET', 'POST'])
         if self.method == 'GET':
             self.uri_path = random.choice(seq=['', fake.uri_path(), fake.uri_path() + '?' + self._get_params()])
