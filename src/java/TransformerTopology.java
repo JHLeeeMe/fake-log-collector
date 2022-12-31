@@ -29,7 +29,6 @@ public class TransformerTopology {
         System.out.println(value);
         for (String k : fieldMap.keySet()) {
             System.out.println("\t" + k + ": " + fieldMap.get(k));
-            //retVal += (fieldMap.get(k));
         }
 
         if (fieldMap.size() == 0) {
@@ -37,12 +36,12 @@ public class TransformerTopology {
         }
 
         if (key.equals("flask")) {
-            retVal = 
-                fieldMap.get("asctime") + ","
+            retVal =
+                DateFormatConverter.convert(fieldMap.get("asctime")) + ","
                 + fieldMap.get("levelname") + ","
                 + fieldMap.get("message");
         } else {
-            retVal = 
+            retVal =
                 fieldMap.get("timestamp") + ","
                 + fieldMap.get("remoteAddr") + ","
                 + fieldMap.get("request") + ","
@@ -52,4 +51,5 @@ public class TransformerTopology {
 
         return retVal;
     }
+
 }
