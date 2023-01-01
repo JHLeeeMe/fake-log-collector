@@ -37,12 +37,12 @@ public class TransformerTopology {
 
         if (key.equals("flask")) {
             retVal =
-                DateFormatConverter.convert(fieldMap.get("asctime")) + ","
+                DateFormatConverter.convert(key, fieldMap.get("asctime")) + ","
                 + fieldMap.get("levelname") + ","
                 + fieldMap.get("message");
         } else {
             retVal =
-                fieldMap.get("timestamp") + ","
+                DateFormatConverter.convert(key, fieldMap.get("timestamp")) + ","
                 + fieldMap.get("remoteAddr") + ","
                 + fieldMap.get("request") + ","
                 + fieldMap.get("statusCode") + ","
@@ -51,5 +51,4 @@ public class TransformerTopology {
 
         return retVal;
     }
-
 }
