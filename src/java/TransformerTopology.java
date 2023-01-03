@@ -23,27 +23,30 @@ public class TransformerTopology {
 
     private String transform(String key, String value) {
         String retVal = "";
-        Map<String, String> fieldMap;
-        switch (key) {
-            case "nginx":
-                fieldMap = LogSplitter.nginxSplit(value);
-                break;
-            case "apache":
-                fieldMap = LogSplitter.apacheSplit("combined", value);
-                break;
-            case "flask":
-                fieldMap = LogSplitter.flaskSplit(value);
-                break;
-            default:
-                System.out.println("######### transform() error.");
-                return "######### transform() error.";
-        }
+        Map<String, String> fieldMap = LogSplitter.split(key, value);
 
         System.out.println(String.format("------- %s Log -------", key));
         System.out.println(value);
         for (String k : fieldMap.keySet()) {
             System.out.println("\t" + k + ": " + fieldMap.get(k));
-            retVal += (fieldMap.get(k));
+        }
+
+        if (fieldMap.size() == 0) {
+            return "";
+        }
+
+        if (key.equals("flask")) {
+            retVal =
+                DateFormatConverter.convert(key, fieldMap.get("asctime")) + ","
+                + fieldMap.get("levelname") + ","
+                + fieldMap.get("message");
+        } else {
+            retVal =
+                DateFormatConverter.convert(key, fieldMap.get("timestamp")) + ","
+                + fieldMap.get("remoteAddr") + ","
+                + fieldMap.get("request") + ","
+                + fieldMap.get("statusCode") + ","
+                + fieldMap.get("bodyBytesSent");
         }
 
         return retVal;
