@@ -25,4 +25,7 @@ for i in $(seq 1 10); do
     sleep 3
 done
 
-./bin/start-producer.sh
+./bin/compile-transformer.sh
+./bin/compile-consumer.sh
+./bin/start-producer.sh &
+./bin/start-consumer.sh
