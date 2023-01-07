@@ -28,4 +28,6 @@ done
 ./bin/compile-transformer.sh
 ./bin/compile-consumer.sh
 ./bin/start-producer.sh &
-./bin/start-consumer.sh
+#./bin/start-transformer.sh &
+#./bin/start-consumer.sh &
+/bin/bash
