@@ -133,3 +133,4 @@ logs/
 target/
 .vscode/
 *test*
+compile_flags.txt
