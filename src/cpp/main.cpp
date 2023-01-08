@@ -1,56 +1,45 @@
 #include <iostream>
-#include <string>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
+#include <sstream>
 #include <memory>
+#include <vector>
 
 #include <rdkafkacpp.h>
 
-class ExampleConsumeCb : public RdKafka::ConsumeCb
-{
-public:
-    void consume_cb (RdKafka::Message &msg, void *opaque)
-    {
-        std::cout << "Received message with value: " << msg.len() << " bytes" << std::endl;
-    }
-};
+#include "consumer_config.h"
 
-int main (int argc, char **argv)
+void split(std::vector<std::string>&, const std::string&, const char&);
+
+int main()
 {
-    std::string brokers = "kafka-single-node:9092";
-    std::string topic_str = "transformed";
-    std::string errstr;
+    const std::string brokers      = "kafka-single-node:9092";
+    const std::string topic_names  = "transformed";  // e.g. "a,b,c,..."
+    std::string       err_str;
+
+    // Create consumer conf
+    std::unique_ptr<RdKafka::Conf> config = create_consumer_config(brokers, "consumer-cpp-group");
 
     // Create Kafka consumer
-    std::unique_ptr<RdKafka::Conf> conf{RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
-    conf->set("metadata.broker.list", brokers, errstr);
-    conf->set("group.id", "test-group", errstr);
-    conf->set("enable.auto.commit", "false", errstr);
-
-    ExampleConsumeCb ex_consume_cb;
-    conf->set("consume_cb", &ex_consume_cb, errstr);
-
-    std::unique_ptr<RdKafka::KafkaConsumer> consumer{RdKafka::KafkaConsumer::create(conf.get(), errstr)};
+    std::unique_ptr<RdKafka::KafkaConsumer> consumer{RdKafka::KafkaConsumer::create(config.get(), err_str)};
     if (!consumer)
     {
-        std::cerr << "Failed to create consumer: " << errstr << std::endl;
+        std::cerr << "Failed to create consumer: " << err_str << std::endl;
         exit(1);
     }
 
     // Subscribe to topic
     std::vector<std::string> topics;
-    topics.push_back(topic_str);
+    split(topics, topic_names, ',');
+
     RdKafka::ErrorCode err = consumer->subscribe(topics);
     if (err)
     {
-        std::cerr << "Failed to subscribe to " << topic_str << ": " << RdKafka::err2str(err) << std::endl;
+        std::cerr << "Failed to subscribe to " << topic_names << ": " << RdKafka::err2str(err) << std::endl;
         exit(2);
     }
 
     while (true)
     {
-        std::unique_ptr<RdKafka::Message> msg(consumer->consume(1000));
+        std::unique_ptr<RdKafka::Message> msg{consumer->consume(1000)};
         if (!msg)
         {
             continue;
@@ -65,13 +54,25 @@ int main (int argc, char **argv)
                           << " [" << msg->partition() << "] at offset " << msg->offset()
                 << std::endl;
             }
-            else
-            {
-                std::cerr << "Error consuming message: " << msg->errstr() << std::endl;
-            }
             continue;
         }
 
-        std::cout << "Read message at offset " << msg->offset() << std::endl;
+        std::cout << "Key: " << *(msg->key()) << std::endl
+                  << "Value: " << std::string(static_cast<char*>(msg->payload()), msg->len())
+        << std::endl;
+    }
+
+    consumer->close();
+
+    return 0;
+}
+
+void split(std::vector<std::string>& vec, const std::string& str, const char& delim)
+{
+    std::string token;
+    std::istringstream token_stream{str};
+    while (std::getline(token_stream, token, delim))
+    {
+        vec.push_back(token);
     }
 }
