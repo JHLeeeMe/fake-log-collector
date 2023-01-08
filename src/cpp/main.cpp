@@ -5,6 +5,8 @@
 
 #include <rdkafkacpp.h>
 
+#include "consumer_config.h"
+
 void split(std::vector<std::string>&, const std::string&, const char&);
 
 int main()
@@ -14,11 +16,7 @@ int main()
     std::string       err_str;
 
     // Create consumer conf
-    std::unique_ptr<RdKafka::Conf> config{RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
-    config->set("bootstrap.servers", brokers, err_str);
-    config->set("group.id", "consumer-cpp-group", err_str);
-    config->set("auto.offset.reset", "latest", err_str);
-    config->set("enable.auto.commit", "true", err_str);
+    std::unique_ptr<RdKafka::Conf> config = create_consumer_config(brokers, "consumer-cpp-group");
 
     // Create Kafka consumer
     std::unique_ptr<RdKafka::KafkaConsumer> consumer{RdKafka::KafkaConsumer::create(config.get(), err_str)};
