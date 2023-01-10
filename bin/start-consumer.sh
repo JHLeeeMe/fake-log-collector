@@ -8,8 +8,9 @@ cat <<EOF
 EOF
 
 PROJECT_ROOT=/workspace
-CPP_ROOT=$PROJECT_ROOT/src/cpp
-LIBS=$CPP_ROOT/libs
+CPP_ROOT=${PROJECT_ROOT}/src/cpp
+CONSUMER_CPP_ROOT=${CPP_ROOT}/consumer-cpp
+LIB=${CPP_ROOT}/lib
 
 echo "exec consumer-cpp"
-${CPP_ROOT}/build/consumer-cpp
+${CONSUMER_CPP_ROOT}/build/consumer-cpp
