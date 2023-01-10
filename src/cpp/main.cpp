@@ -7,7 +7,7 @@
 
 #include "consumer_config.h"
 
-void split(std::vector<std::string>&, const std::string&, const char&);
+void split_topics(std::vector<std::string>&, const std::string&, const char);
 
 int main()
 {
@@ -16,7 +16,7 @@ int main()
     std::string       err_str;
 
     // Create consumer conf
-    std::unique_ptr<RdKafka::Conf> config = create_consumer_config(brokers, "consumer-cpp-group");
+    std::unique_ptr<RdKafka::Conf> config{create_consumer_config(brokers, "consumer-cpp-group")};
 
     // Create Kafka consumer
     std::unique_ptr<RdKafka::KafkaConsumer> consumer{RdKafka::KafkaConsumer::create(config.get(), err_str)};
@@ -28,13 +28,12 @@ int main()
 
     // Subscribe to topic
     std::vector<std::string> topics;
-    split(topics, topic_names, ',');
-
+    split_topics(topics, topic_names, ',');
     RdKafka::ErrorCode err = consumer->subscribe(topics);
     if (err)
     {
-        std::cerr << "Failed to subscribe to " << topic_names << ": " << RdKafka::err2str(err) << std::endl;
-        exit(2);
+       std::cerr << "Failed to subscribe to " << topic_names << ": " << RdKafka::err2str(err) << std::endl;
+       exit(2);
     }
 
     while (true)
@@ -67,7 +66,7 @@ int main()
     return 0;
 }
 
-void split(std::vector<std::string>& vec, const std::string& str, const char& delim)
+void split_topics(std::vector<std::string>& vec, const std::string& str, const char delim)
 {
     std::string token;
     std::istringstream token_stream{str};
