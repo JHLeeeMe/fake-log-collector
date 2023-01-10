@@ -8,10 +8,11 @@ cat <<EOF
 EOF
 
 PROJECT_ROOT=/workspace
-PYTHON_ROOT=$PROJECT_ROOT/src/python
+PYTHON_ROOT=${PROJECT_ROOT}/src/python
+LOG_GENERATORS_ROOT=${PYTHON_ROOT}/log-generators
 
 echo "pip installing..."
-pip install -r $PYTHON_ROOT/log-generators/requirements.txt
+pip install -r ${LOG_GENERATORS_ROOT}/requirements.txt
 
 echo "exec log_generator.py"
-python $PYTHON_ROOT/log-generators/log_generator.py
+python ${LOG_GENERATORS_ROOT}/log_generator.py
