@@ -15,6 +15,7 @@ services:
     depends_on:
       - master
       - kafka-single-node
+     #- influxdb
     networks:
       net:
         ipv4_address: 10.0.0.10
@@ -92,6 +93,18 @@ services:
     networks:
       net:
         ipv4_address: 10.0.0.30
+
+#  ############
+#  # InfluxDB #
+#  ############
+#  influxdb:
+#    image: influxdb:alpine
+#    container_name: influxdb
+#    hostname: influxdb
+#    restart: always
+#    networks:
+#      net:
+#        ipv4_address: 10.0.0.40
 
 #  ##############
 #  # POSTGRESQL #
