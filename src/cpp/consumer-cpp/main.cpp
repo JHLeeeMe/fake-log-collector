@@ -6,6 +6,7 @@
 #include <rdkafkacpp.h>
 
 #include "consumer_config.h"
+#include "mqueue_sender.h"
 
 void split_topics(std::vector<std::string>&, const std::string&, const char);
 
@@ -36,6 +37,9 @@ int main()
        exit(2);
     }
 
+    // Create Message Queue Sender
+    MQSender sender{MQSender()};
+
     while (true)
     {
         std::unique_ptr<RdKafka::Message> msg{consumer->consume(1000)};
@@ -56,9 +60,17 @@ int main()
             continue;
         }
 
-        std::cout << "Key: " << *(msg->key()) << std::endl
-                  << "Value: " << std::string(static_cast<char*>(msg->payload()), msg->len())
-        << std::endl;
+        //std::cout << "Key: " << *(msg->key()) << std::endl
+        //          << "Value: " << std::string(static_cast<char*>(msg->payload()), msg->len())
+        //<< std::endl;
+
+        //std::string tmp{std::string(*(msg->key())) + "," + std::string(static_cast<char*>(msg->payload()))};
+        //std::cout << tmp << std::endl;
+
+        std::stringstream ss;
+        ss << *(msg->key()) << "," << static_cast<const char*>(msg->payload());
+        std::cout << ss.str().c_str() << std::endl;
+        sender.send_msg(ss.str().c_str());
     }
 
     consumer->close();
