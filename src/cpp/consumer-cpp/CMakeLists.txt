@@ -14,7 +14,7 @@ include_directories(${CMAKE_BINARY_DIR}/_deps/librdkafka-src/src-cpp)
 include_directories(include)
 
 # Add your source files
-add_executable(consumer-cpp main.cpp consumer_config.cpp)
+add_executable(consumer-cpp main.cpp consumer_config.cpp mqueue_sender.cpp)
 
 # Link against librdkafka
 target_link_libraries(consumer-cpp PRIVATE rdkafka++)
