@@ -28,3 +28,4 @@ private:
     int           _msg_id;
     struct MsgBuf _msg;
 };
+
