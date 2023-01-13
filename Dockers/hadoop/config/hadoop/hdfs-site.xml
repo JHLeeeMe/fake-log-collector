@@ -23,4 +23,8 @@
         <name>dfs.namenode.http-address</name>
         <value>0.0.0.0:50070</value>
     </property>
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
+    </property>
 </configuration>
