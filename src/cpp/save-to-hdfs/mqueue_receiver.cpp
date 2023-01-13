@@ -47,3 +47,4 @@ void MQReceiver::recv_msg()
     std::cout << "msg type: " << _msg.type         << std::endl
               << "msg     : " << _msg.payload.data << std::endl;
 }
+
