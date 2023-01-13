@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
@@ -22,7 +23,8 @@ public:
     MQReceiver(std::string&);
     ~MQReceiver();
 public:
-    void recv_msg();
+    void                           recv_msg();
+    std::unique_ptr<struct MsgBuf> get_msg();
 private:
     key_t         _key;
     int           _msg_id;
