@@ -14,7 +14,12 @@ def create_topic(topic: str, num_partitions: int = 3, replica: int = 1):
                          replication_factor=replica,
                          topic_configs=topic_config)
     admin_client.create_topics(new_topics=[new_topic])
+    admin_client.close()
 
+
+def delete_topic(topic: str):
+    admin_client = KafkaAdminClient(bootstrap_servers=['kafka-single-node:9092'])
+    admin_client.delete_topics(topics=topic)
     admin_client.close()
 
 
