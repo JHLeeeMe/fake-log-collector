@@ -172,8 +172,9 @@ if __name__ == '__main__':
         #   delete.retention.ms = 0.5 hour
         #   retention.bytes: 5GB
         configs.create_topic(topic='raw', num_partitions=3, replica=1)
-    except errors.TopicAuthorizationFailedError:
-        configs.alter_retention_policy(topic='raw', hour=1)
+    except errors.TopicAlreadyExistsError:
+        configs.delete_topic(topic='raw')
+        configs.create_topic(topic='raw', num_partitions=3, replica=1)
 
     producer: KafkaProducer | None = None
     for i in range(5):
