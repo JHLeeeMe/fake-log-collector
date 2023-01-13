@@ -32,7 +32,7 @@ MQReceiver::~MQReceiver()
     if (msgctl(_msg_id, IPC_RMID, nullptr) < 0)
     {
         std::cerr << "msgctl(..., IPC_RMID, ...) failed..." << std::endl;
-        exit(2);
+        exit(-1);
     }
 }
 
@@ -43,7 +43,9 @@ void MQReceiver::recv_msg()
         std::cerr << "msgrcv() failed..." << std::endl;
         exit(2);
     }
+}
 
-    std::cout << "msg type: " << _msg.type         << std::endl
-              << "msg     : " << _msg.payload.data << std::endl;
+std::unique_ptr<struct MsgBuf> MQReceiver::get_msg()
+{
+    return std::make_unique<struct MsgBuf>(_msg);
 }

@@ -28,7 +28,7 @@ from datetime import datetime
 
 from faker import Faker
 from pytz import timezone
-from kafka import KafkaProducer
+from kafka import KafkaProducer, errors
 
 import utils
 import configs
@@ -166,11 +166,15 @@ def send_to_topic(producer: KafkaProducer, key: str, topic: str = 'raw'):
 
 
 if __name__ == '__main__':
-    # Create 'raw' topic
-    #   retention.ms: 1 hour,
-    #   delete.retention.ms = 0.5 hour
-    #   retention.bytes: 5GB
-    configs.create_topic(topic='raw', num_partitions=3, replica=1)
+    try:
+        # Create 'raw' topic
+        #   retention.ms: 1 hour,
+        #   delete.retention.ms = 0.5 hour
+        #   retention.bytes: 5GB
+        configs.create_topic(topic='raw', num_partitions=3, replica=1)
+    except errors.TopicAlreadyExistsError:
+        configs.delete_topic(topic='raw')
+        configs.create_topic(topic='raw', num_partitions=3, replica=1)
 
     producer: KafkaProducer | None = None
     for i in range(5):

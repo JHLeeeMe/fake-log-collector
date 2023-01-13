@@ -69,7 +69,6 @@ int main()
 
         std::stringstream ss;
         ss << *(msg->key()) << "," << static_cast<const char*>(msg->payload());
-        std::cout << ss.str().c_str() << std::endl;
         sender.send_msg(ss.str().c_str());
     }
 
