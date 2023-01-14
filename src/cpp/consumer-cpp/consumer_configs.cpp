@@ -1,4 +1,7 @@
-#include "consumer_config.h"
+#include "consumer_configs.h"
+
+namespace configs
+{
 
 std::unique_ptr<RdKafka::Conf> create_consumer_config(
     const std::string& brokers,
@@ -58,3 +61,6 @@ std::unique_ptr<RdKafka::Conf> create_consumer_config(
 
     return config;
 }
+
+}
+
