@@ -2,10 +2,23 @@
 
 #include "mqueue_receiver.h"
 
+void set_url(std::string* url,
+             const std::string op,
+             const std::string& path = "",
+             const std::string& addr = "master",
+             const std::string& port = "50070")
+{
+    url->clear();
+    url->append("http://" + addr + ":" + port);
+    url->append("/webhdfs/v1/" + path);
+    url->append("?op=" + op);
+    url->append("&noredirect=true");
+}
+
 size_t write_callback(char* response_data, size_t size, size_t nmemb, void* user_data)
 {
     ((std::string*)user_data)->append(response_data, size * nmemb);
-    //response.append(data, size * nmemb);
+
     return size * nmemb;
 }
 
@@ -23,13 +36,12 @@ int main()
 
     CURLcode res;
 
-    std::string data;
-    std::string url{"http://master:50070/webhdfs/v1/?op=CREATE&noredirect=true"};
+    std::string url;
     std::string response;
 
-    curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
+    set_url(&url, "CREATE", "tmp");
+    curl_easy_setopt(curl.get(), CURLOPT_URL, &url);
     curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "PUT");
-    //curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, "hello, webHDFS!");
     curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
 
@@ -40,22 +52,15 @@ int main()
         exit(1);
     }
 
-    std::cout << "hi" << std::endl;
     std::cout << response << std::endl;
 
-    //char* ct;
-    /* ask for the content-type */
-    //res = curl_easy_getinfo(curl.get(), CURLINFO_CONTENT_TYPE, &ct);
+    set_url(&url, "APPEND");
+    curl_easy_setopt(curl.get(), CURLOPT_URL, &url);
+    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "POST");
+    curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, "hello, webHDFS!");
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
 
-    //if((CURLE_OK == res) && ct)
-    //{
-    //    std::cout << "\n---------------- Content-Type ----------------\n"
-    //              << ct << std::endl;;
-    //}
-    ///////////////////////////////////////////////////////////////////////////
-
-
-    std::cout << "yahoo!" << std::endl;
 
     while (true)
     {
