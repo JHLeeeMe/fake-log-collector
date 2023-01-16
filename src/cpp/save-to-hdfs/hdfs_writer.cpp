@@ -1,7 +1,9 @@
 #include "hdfs_writer.hpp"
 
-HDFSWriter::HDFSWriter()
+HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
     : _curl(curl_easy_init(), &curl_easy_cleanup)
+    , _addr(addr)
+    , _port(port)
 {
     if (!_curl)
     {
@@ -13,13 +15,116 @@ HDFSWriter::HDFSWriter()
 HDFSWriter::~HDFSWriter()
 {}
 
-void HDFSWriter::set_url()
+void HDFSWriter::request(const enum OP op, const std::string path, const std::string& msg)
 {
-    url->clear();
-    url->append(
-        "http://" + addr + ":" + port +
+first:
+    for (int i = 0; i < 2; i++)
+    {
+        switch (op)
+        {
+        case OP::CREATE:
+            if (i == 0)
+            {
+                set_url("CREATE", path);
+            }
+            set_curl_opt("PUT");
+            break;
+        case OP::APPEND:
+            if (i == 0)
+            {
+                set_url("APPEND", path);
+            }
+            else
+            {
+                curl_easy_setopt(_curl.get(), CURLOPT_POSTFIELDS, msg.c_str());
+            }
+            set_curl_opt("POST");
+            break;
+        default:
+            break;
+        }
+
+        _code = curl_easy_perform(_curl.get());
+        if (_code != CURLE_OK)
+        {
+            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(_code) << std::endl;
+            exit(1);
+        }
+
+        if (i != 0)
+        {
+            break;
+        }
+
+        if (_response[0] != '{')
+        {
+            std::cerr << _response << std::endl;
+            _response.clear();
+            _location.clear();
+            curl_easy_reset(_curl.get());
+            goto first;
+        }
+
+        set_location();
+
+        _response.clear();
+        curl_easy_reset(_curl.get());
+    }
+    std::cout << "ok." << std::endl;
+
+    _response.clear();
+    _location.clear();
+}
+
+size_t HDFSWriter::write_callback(char* response_data, size_t size, size_t nmemb, void* user_data)
+{
+    ((std::string*)user_data)->append(response_data, size * nmemb);
+
+    return size * nmemb;
+}
+
+void HDFSWriter::set_curl_opt(const std::string method)
+{
+    curl_easy_setopt(_curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(_curl.get(), CURLOPT_WRITEDATA, &_response);
+    curl_easy_setopt(_curl.get(), CURLOPT_CUSTOMREQUEST, method.c_str());
+
+    if (_location.empty())
+    {
+        curl_easy_setopt(_curl.get(), CURLOPT_URL, _url.c_str());
+    }
+    else
+    {
+        curl_easy_setopt(_curl.get(), CURLOPT_URL, _location.c_str());
+    }
+}
+
+void HDFSWriter::set_url(const std::string op, const std::string path)
+{
+    _url.clear();
+    _url.append(
+        "http://" + _addr + ":" + _port +
         "/webhdfs/v1/" + path +
         "?op=" + op +
         "&noredirect=true"
     );
 }
+
+void HDFSWriter::set_location()
+{
+    rapidjson::Document doc;
+    doc.Parse(_response.c_str());
+
+    for (const auto& m : doc.GetObject())
+    {
+        const std::string key = m.name.GetString();
+        if (key != std::string("Location"))
+        {
+            std::cerr << m.value.GetString() << std::endl;
+            exit(1);
+        }
+
+        _location = m.value.GetString();
+    }
+}
+
