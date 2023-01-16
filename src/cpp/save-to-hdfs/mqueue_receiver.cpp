@@ -1,4 +1,4 @@
-#include "mqueue_receiver.h"
+#include "mqueue_receiver.hpp"
 
 MQReceiver::MQReceiver()
     : _key(ftok("/dev/mqueue/", 255))

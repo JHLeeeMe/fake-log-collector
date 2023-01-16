@@ -1,4 +1,4 @@
-#include "mqueue_sender.h"
+#include "mqueue_sender.hpp"
 
 MQSender::MQSender()
     : _key(ftok("/dev/mqueue/", 255))

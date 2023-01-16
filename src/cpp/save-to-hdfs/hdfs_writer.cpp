@@ -1,4 +1,4 @@
-#include "hdfs_writer.h"
+#include "hdfs_writer.hpp"
 
 HDFSWriter::HDFSWriter()
     : _curl(curl_easy_init(), &curl_easy_cleanup)
