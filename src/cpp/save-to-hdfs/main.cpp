@@ -1,7 +1,7 @@
 #include <curl/curl.h>
 
 #include "rapidjson/document.h"
-#include "mqueue_receiver.h"
+#include "mqueue_receiver.hpp"
 
 struct timespec start, end;
 
