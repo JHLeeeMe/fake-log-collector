@@ -18,10 +18,10 @@ void set_url(std::string* url,
     url->append("&noredirect=true");
 }
 
-rapidjson::Document get_json(const char* str)
+std::unique_ptr<rapidjson::Document> get_json(const char* str)
 {
-    rapidjson::Document doc;
-    doc.Parse(str);
+    auto doc = std::make_unique<rapidjson::Document>();
+    doc->Parse(str);
 
     return doc;
 }
@@ -35,7 +35,8 @@ size_t write_callback(char* response_data, size_t size, size_t nmemb, void* user
 
 int main()
 {
-    MQReceiver receiver{MQReceiver()};
+    MQReceiver receiver;
+    //HDFSWriter hdfs_writer;
 
     ///////////////////////////////////////////////////////////////////////////
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl{curl_easy_init(), &curl_easy_cleanup};
@@ -50,7 +51,7 @@ int main()
     std::string url;
     std::string response;
     std::string location;
-    rapidjson::Document doc;
+    std::unique_ptr<rapidjson::Document> doc;
 
     ////////// Create /tmp
     set_url(&url, "CREATE", "tmp");
@@ -67,7 +68,7 @@ int main()
     }
 
     doc = get_json(response.c_str());
-    for (const auto& m : doc.GetObject())
+    for (const auto& m : doc->GetObject())
     {
         if (m.name.GetString() == std::string("RemoteException"))
         {
@@ -164,7 +165,7 @@ int main()
         }
 
         doc = get_json(response.c_str());
-        for (const auto& m : doc.GetObject())
+        for (const auto& m : doc->GetObject())
         {
             if (m.name.GetString() == std::string("RemoteException"))
             {
