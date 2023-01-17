@@ -15,41 +15,34 @@ HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
 HDFSWriter::~HDFSWriter()
 {}
 
-void HDFSWriter::request(const enum OP op, const std::string path, const std::string& msg)
+void HDFSWriter::write(const enum OP& op, const std::string& path, const std::string* msg)
+{
+    switch (op)
+    {
+    case OP::CREATE:
+        request_put(path);
+        break;
+    case OP::APPEND:
+        request_post(path, *msg);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+}
+
+void HDFSWriter::request_put(const std::string& path)
 {
 first:
     for (int i = 0; i < 2; i++)
     {
-        switch (op)
+        if (i == 0)
         {
-        case OP::CREATE:
-            if (i == 0)
-            {
-                set_url("CREATE", path);
-            }
-            set_curl_opt("PUT");
-            break;
-        case OP::APPEND:
-            if (i == 0)
-            {
-                set_url("APPEND", path);
-            }
-            else
-            {
-                curl_easy_setopt(_curl.get(), CURLOPT_POSTFIELDS, msg.c_str());
-            }
-            set_curl_opt("POST");
-            break;
-        default:
-            break;
+            set_url("CREATE", path);
         }
+        set_curl_opt("PUT");
 
-        _code = curl_easy_perform(_curl.get());
-        if (_code != CURLE_OK)
-        {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(_code) << std::endl;
-            exit(1);
-        }
+        curl_perform();
 
         if (i != 0)
         {
@@ -62,6 +55,50 @@ first:
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
+
+            goto first;
+        }
+
+        set_location();
+
+        _response.clear();
+        curl_easy_reset(_curl.get());
+    }
+    std::cout << "ok." << std::endl;
+
+    _response.clear();
+    _location.clear();
+}
+
+void HDFSWriter::request_post(const std::string& path, const std::string& msg)
+{
+first:
+    for (int i = 0; i < 2; i++)
+    {
+        if (i == 0)
+        {
+            set_url("APPEND", path);
+        }
+        else
+        {
+            curl_easy_setopt(_curl.get(), CURLOPT_POSTFIELDS, msg.c_str());
+        }
+        set_curl_opt("POST");
+
+        curl_perform();
+
+        if (i != 0)
+        {
+            break;
+        }
+
+        if (_response[0] != '{')
+        {
+            std::cerr << _response << std::endl;
+            _response.clear();
+            _location.clear();
+            curl_easy_reset(_curl.get());
+
             goto first;
         }
 
@@ -83,6 +120,17 @@ size_t HDFSWriter::write_callback(char* response_data, size_t size, size_t nmemb
     return size * nmemb;
 }
 
+void HDFSWriter::set_url(const std::string op, const std::string path)
+{
+    _url.clear();
+    _url.append(
+        "http://" + _addr + ":" + _port +
+        "/webhdfs/v1/" + path +
+        "?op=" + op +
+        "&noredirect=true"
+    );
+}
+
 void HDFSWriter::set_curl_opt(const std::string method)
 {
     curl_easy_setopt(_curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
@@ -97,17 +145,6 @@ void HDFSWriter::set_curl_opt(const std::string method)
     {
         curl_easy_setopt(_curl.get(), CURLOPT_URL, _location.c_str());
     }
-}
-
-void HDFSWriter::set_url(const std::string op, const std::string path)
-{
-    _url.clear();
-    _url.append(
-        "http://" + _addr + ":" + _port +
-        "/webhdfs/v1/" + path +
-        "?op=" + op +
-        "&noredirect=true"
-    );
 }
 
 void HDFSWriter::set_location()
@@ -125,6 +162,16 @@ void HDFSWriter::set_location()
         }
 
         _location = m.value.GetString();
+    }
+}
+
+void HDFSWriter::curl_perform()
+{
+    _code = curl_easy_perform(_curl.get());
+    if (_code != CURLE_OK)
+    {
+        std::cerr << "perform() failed: " << curl_easy_strerror(_code) << std::endl;
+        exit(1);
     }
 }
 
