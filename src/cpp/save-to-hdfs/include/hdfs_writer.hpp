@@ -32,6 +32,7 @@ private:
 private:
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> _curl;
     CURLcode _code;
+    long _response_code;
 
     std::string _addr;
     std::string _port;

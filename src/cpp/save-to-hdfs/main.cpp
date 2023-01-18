@@ -1,5 +1,3 @@
-#include <curl/curl.h>
-
 #include "rapidjson/document.h"
 #include "mqueue_receiver.hpp"
 #include "hdfs_writer.hpp"
@@ -9,17 +7,24 @@ int main()
     MQReceiver receiver;
     HDFSWriter hdfs_writer{"master", "50070"};
 
-    hdfs_writer.write(OP::CREATE, "tmp", nullptr);
-
+    std::unique_ptr<struct MsgBuf> msg;
+    //long type;
+    std::string data;
+    std::string key;
+    std::string path;
     while (true)
     {
         receiver.recv_msg();
-        std::unique_ptr<struct MsgBuf> msg = receiver.get_msg();
-        //std::cout << "Type: " << msg->type << std::endl;
-        //std::cout << "Message: " << (msg->payload).data << std::endl;
-        std::string tmp_msg = std::string((msg->payload).data) + "\n";
+        msg = receiver.get_msg();
 
-        hdfs_writer.write(OP::APPEND, "tmp", &tmp_msg);
+        //type = msg->type;
+        data = (msg->payload).data;
+        data.push_back('\n');
+
+        key = data.substr(0, data.find(','));
+        path = key + "/log.csv";
+
+        hdfs_writer.write(OP::APPEND, path, &data);
     }
 
     return 0;

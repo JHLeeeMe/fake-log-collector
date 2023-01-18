@@ -1,3 +1,5 @@
+#include <curl/curl.h>
+
 #include "hdfs_writer.hpp"
 
 HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
@@ -49,9 +51,10 @@ first:
             break;
         }
 
-        if (_response[0] != '{')
+        if (_response_code != 200)
         {
-            std::cerr << _response << std::endl;
+            std::cerr << "Error Code: " << _response_code << std::endl
+                      << _response << std::endl;
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
@@ -92,12 +95,19 @@ first:
             break;
         }
 
-        if (_response[0] != '{')
+        if (_response_code != 200)
         {
-            std::cerr << _response << std::endl;
+            std::cerr << "Error Code: " << _response_code << std::endl
+                      << _response << std::endl;
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
+
+            if (_response_code == 404)  // file not exists.
+            {
+                std::cout << "Creating `/" << path << "`" << std::endl;
+                request_put(path);
+            }
 
             goto first;
         }
@@ -152,16 +162,17 @@ void HDFSWriter::set_location()
     rapidjson::Document doc;
     doc.Parse(_response.c_str());
 
+    std::string key;
     for (const auto& m : doc.GetObject())
     {
-        const std::string key = m.name.GetString();
-        if (key != std::string("Location"))
+        key = m.name.GetString();
+        if (key != "Location")
         {
             std::cerr << m.value.GetString() << std::endl;
             exit(1);
         }
-
         _location = m.value.GetString();
+        break;
     }
 }
 
@@ -173,5 +184,7 @@ void HDFSWriter::curl_perform()
         std::cerr << "perform() failed: " << curl_easy_strerror(_code) << std::endl;
         exit(1);
     }
+
+    curl_easy_getinfo(_curl.get(), CURLINFO_RESPONSE_CODE, &_response_code);
 }
 
