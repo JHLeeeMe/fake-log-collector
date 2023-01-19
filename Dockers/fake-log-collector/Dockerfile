@@ -4,6 +4,11 @@ LABEL maintainer="JHLeeeMe"
 ARG JAVA_VERSION=17
 ARG PYTHON_VERSION=3.10.9-r1
 
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
+    echo "Asia/Seoul" > /etc/timezone && \
+    apk del tzdata
+
 RUN apk add --no-cache bash tree wget vim git cmake make g++ libbsd-dev curl-dev
 RUN apk add --no-cache openjdk${JAVA_VERSION}
 RUN apk add --no-cache python3=${PYTHON_VERSION} \
