@@ -4,6 +4,9 @@ LABEL maintainer="JHLeeeMe"
 # install dev tools
 RUN apt-get update && \
     apt-get -y upgrade && \
+    apt-get install -yq tzdata && \
+    ln -fs /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
     apt-get install -y build-essential && \
     apt-get install -y software-properties-common && \
     apt-get install -y tree vim net-tools wget openssh-server openssh-client htop iputils-ping sudo git make curl man unzip rsync && \
