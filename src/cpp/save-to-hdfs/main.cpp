@@ -16,7 +16,7 @@ int main()
     std::tm     date_tm{};
     set_time(&date_t, &date_tm, nullptr);
 
-    std::string msg_date;
+    std::string msg_date_str;
     std::time_t msg_t;
     std::tm     msg_tm{};
 
@@ -40,9 +40,11 @@ int main()
         path = key + "/log.csv";
 
         // get date from msg
-        msg_date = msg.substr(key_len + 1, msg.find('T', key_len + 1) - (key_len + 1));
-        strptime(msg_date.c_str(), "%Y-%m-%d", &msg_tm);
+        msg_date_str = msg.substr(key_len + 1, msg.find('T', key_len + 1) - (key_len + 1));
+        strptime(msg_date_str.c_str(), "%Y-%m-%d", &msg_tm);
         msg_t = std::mktime(&msg_tm);
+
+        msg = msg.substr(key_len + 1);
 
         if (msg_t == date_t)
         {
@@ -50,15 +52,14 @@ int main()
         }
         else
         {
-            const std::string dst = key + "/" + msg_date + "_log.csv";
+            const std::string dst = key + "/" + msg_date_str + "_log.csv";
 
             if (msg_t > date_t)
             {
-                // and reset date_t
                 set_time(&date_t, nullptr, &msg_t);
-
                 hdfs_writer.rename_file(path, dst);
                 hdfs_writer.append_msg(path, msg);
+
                 continue;
             }
 
