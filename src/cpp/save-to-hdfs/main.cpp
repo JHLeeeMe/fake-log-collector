@@ -13,17 +13,18 @@ int main()
     HDFSWriter hdfs_writer{"master", "50070"};
 
     std::time_t date_t;
-    std::tm date_tm{};
+    std::tm     date_tm{};
     set_time(&date_t, &date_tm, nullptr);
 
     std::string msg_date;
     std::time_t msg_t;
-    std::tm msg_tm{};
+    std::tm     msg_tm{};
 
     std::unique_ptr<struct MsgBuf> msg_buf;
     //long type;
     std::string msg;
     std::string key;
+    int         key_len;
     std::string path;
     while (true)
     {
@@ -34,23 +35,22 @@ int main()
         msg = (msg_buf->payload).data;
         msg.push_back('\n');
 
-        key = msg.substr(0, msg.find(','));
+        key_len = msg.find(',');
+        key = msg.substr(0, key_len);
         path = key + "/log.csv";
 
         // get date from msg
-        int pos = msg.find_first_of(',');
-        msg_date = msg.substr(pos + 1, msg.find_first_of('T', pos + 1) - 1 - pos);
+        msg_date = msg.substr(key_len + 1, msg.find('T', key_len + 1) - (key_len + 1));
         strptime(msg_date.c_str(), "%Y-%m-%d", &msg_tm);
         msg_t = std::mktime(&msg_tm);
 
         if (msg_t == date_t)
         {
-            //hdfs_writer.write(OP::APPEND, path, &msg);
             hdfs_writer.append_msg(path, msg);
         }
         else
         {
-            const std::string dst = key + "/" + msg_date + "-log.csv";
+            const std::string dst = key + "/" + msg_date + "_log.csv";
 
             if (msg_t > date_t)
             {
