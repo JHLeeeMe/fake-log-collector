@@ -42,18 +42,9 @@ void MQSender::send_msg(const char* value)
 
     memset(&_payload, 0x00, sizeof(struct Data));
     strcpy(_payload.data, value);
-    memset(&_msg, 0x00, sizeof(struct MsgBuf));
 
-    std::string key = s.substr(0, s.find(','));
-    if (key == "nginx" || key == "apache")
-    {
-        _msg.type = 1;
-        _msg.payload = _payload;
-    }
-    else if (key == "flask")
-    {
-        _msg.type = 2;
-    }
+    memset(&_msg, 0x00, sizeof(struct MsgBuf));
+    _msg.type = 1;
     _msg.payload = _payload;
 
     if (msgsnd(_msg_id, &_msg, sizeof(struct MsgBuf), 0) < 0)

@@ -1,198 +1,90 @@
-#include <curl/curl.h>
+#include <ctime>
+#include <cstdlib>
 
 #include "rapidjson/document.h"
 #include "mqueue_receiver.hpp"
+#include "hdfs_writer.hpp"
 
-struct timespec start, end;
-
-void set_url(std::string* url,
-             const std::string op,
-             const std::string& path = "",
-             const std::string& addr = "master",
-             const std::string& port = "50070")
-{
-    url->clear();
-    url->append("http://" + addr + ":" + port);
-    url->append("/webhdfs/v1/" + path);
-    url->append("?op=" + op);
-    url->append("&noredirect=true");
-}
-
-std::unique_ptr<rapidjson::Document> get_json(const char* str)
-{
-    auto doc = std::make_unique<rapidjson::Document>();
-    doc->Parse(str);
-
-    return doc;
-}
-
-size_t write_callback(char* response_data, size_t size, size_t nmemb, void* user_data)
-{
-    ((std::string*)user_data)->append(response_data, size * nmemb);
-
-    return size * nmemb;
-}
+void set_time(std::time_t* time, std::tm* tm, std::time_t* date_time);
 
 int main()
 {
     MQReceiver receiver;
-    //HDFSWriter hdfs_writer;
+    HDFSWriter hdfs_writer{"master", "50070"};
 
-    ///////////////////////////////////////////////////////////////////////////
-    std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl{curl_easy_init(), &curl_easy_cleanup};
-    if(!curl)
-    {
-        std::cerr << "curl_easy_init() failed..." << std::endl;
-        exit(1);
-    }
+    std::time_t date_t;
+    std::tm date_tm{};
+    set_time(&date_t, &date_tm, nullptr);
 
-    CURLcode res;
+    std::string msg_date;
+    std::time_t msg_t;
+    std::tm msg_tm{};
 
-    std::string url;
-    std::string response;
-    std::string location;
-    std::unique_ptr<rapidjson::Document> doc;
-
-    ////////// Create /tmp
-    set_url(&url, "CREATE", "tmp");
-    curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-    res = curl_easy_perform(curl.get());
-    if(CURLE_OK != res)
-    {
-        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        exit(1);
-    }
-
-    doc = get_json(response.c_str());
-    for (const auto& m : doc->GetObject())
-    {
-        if (m.name.GetString() == std::string("RemoteException"))
-        {
-            std::cerr << m.value["exception"].GetString() << std::endl;
-            exit(1);
-        }
-
-        location = m.value.GetString();
-    }
-
-    response.clear();
-    curl_easy_reset(curl.get());
-    curl_easy_setopt(curl.get(), CURLOPT_URL, location.c_str());
-    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-    res = curl_easy_perform(curl.get());
-    if(CURLE_OK != res)
-    {
-        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        exit(1);
-    }
-    ////////////////////////
-
-    //////////////// Append to tmp
-    //for (int i = 0; i < 1000; i++)
-    //{
-    //    set_url(&url, "APPEND", "tmp");
-    //    response.clear();
-    //    curl_easy_reset(curl.get());
-    //    curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
-    //    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "POST");
-    //    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    //    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-    //    res = curl_easy_perform(curl.get());
-    //    if(CURLE_OK != res)
-    //    {
-    //        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-    //        exit(1);
-    //    }
-
-    //    doc = get_json(response.c_str());
-    //    for (const auto& m : doc.GetObject())
-    //    {
-    //        if (m.name.GetString() == std::string("RemoteException"))
-    //        {
-    //            std::cerr << m.value["exception"].GetString() << std::endl;
-    //            exit(1);
-    //        }
-
-    //        location = m.value.GetString();
-    //    }
-
-    //    response.clear();
-    //    curl_easy_reset(curl.get());
-    //    curl_easy_setopt(curl.get(), CURLOPT_URL, location.c_str());
-    //    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "POST");
-    //    curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, "hello, webHDFS!\n");
-    //    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    //    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-    //    res = curl_easy_perform(curl.get());
-    //    if(CURLE_OK != res)
-    //    {
-    //        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-    //        exit(1);
-    //    }
-    //    std::cout << i << std::endl;
-    //}
-    //////////////////////
-
+    std::unique_ptr<struct MsgBuf> msg_buf;
+    //long type;
+    std::string msg;
+    std::string key;
+    std::string path;
     while (true)
     {
         receiver.recv_msg();
-        std::unique_ptr<struct MsgBuf> msg = receiver.get_msg();
-        //std::cout << "Type: " << msg->type << std::endl;
-        //std::cout << "Message: " << (msg->payload).data << std::endl;
-        std::string tmp = std::string((msg->payload).data) + "\n";
-        set_url(&url, "APPEND", "tmp");
-        response.clear();
-        curl_easy_reset(curl.get());
-        curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "POST");
-        curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
+        msg_buf = receiver.get_msg();
 
-        res = curl_easy_perform(curl.get());
-        if(CURLE_OK != res)
+        //type = msg->type;
+        msg = (msg_buf->payload).data;
+        msg.push_back('\n');
+
+        key = msg.substr(0, msg.find(','));
+        path = key + "/log.csv";
+
+        // get date from msg
+        int pos = msg.find_first_of(',');
+        msg_date = msg.substr(pos + 1, msg.find_first_of('T', pos + 1) - 1 - pos);
+        strptime(msg_date.c_str(), "%Y-%m-%d", &msg_tm);
+        msg_t = std::mktime(&msg_tm);
+
+        if (msg_t == date_t)
         {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-            exit(1);
+            //hdfs_writer.write(OP::APPEND, path, &msg);
+            hdfs_writer.append_msg(path, msg);
         }
-
-        doc = get_json(response.c_str());
-        for (const auto& m : doc->GetObject())
+        else
         {
-            if (m.name.GetString() == std::string("RemoteException"))
+            const std::string dst = key + "/" + msg_date + "-log.csv";
+
+            if (msg_t > date_t)
             {
-                std::cerr << m.value["exception"].GetString() << std::endl;
-                exit(1);
+                // and reset date_t
+                set_time(&date_t, nullptr, &msg_t);
+
+                hdfs_writer.rename_file(path, dst);
+                hdfs_writer.append_msg(path, msg);
+                continue;
             }
 
-            location = m.value.GetString();
+            hdfs_writer.append_msg(dst, msg);
         }
-
-        response.clear();
-        curl_easy_reset(curl.get());
-        curl_easy_setopt(curl.get(), CURLOPT_URL, location.c_str());
-        curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "POST");
-        curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, tmp.c_str());
-        curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-        res = curl_easy_perform(curl.get());
-        if(CURLE_OK != res)
-        {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-            exit(1);
-        }
-        std::cout << "ok." << std::endl;
     }
 
     return 0;
+}
+
+void set_time(std::time_t* t, std::tm* tm, std::time_t* date_t)
+{
+    if (date_t)
+    {
+        *t = *date_t;
+        return;
+    }
+
+    *t = std::time(nullptr);
+
+    tm = std::localtime(t);
+    tm->tm_hour = 0;
+    tm->tm_min = 0;
+    tm->tm_sec = 0;
+    tm->tm_isdst = -1;
+
+    *t = std::mktime(tm);
 }
 
