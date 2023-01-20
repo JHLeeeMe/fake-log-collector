@@ -5,6 +5,11 @@ ARG JAVA_VERSION=17
 ARG SCALA_VERSION=2.13
 ARG KAFKA_VERSION=3.3.1
 
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime && \
+    echo "Asia/Seoul" > /etc/timezone && \
+    apk del tzdata
+
 RUN apk add --no-cache bash tree wget vim
 RUN apk add --no-cache openjdk${JAVA_VERSION}
 
