@@ -17,7 +17,7 @@ HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
 HDFSWriter::~HDFSWriter()
 {}
 
-void HDFSWriter::create_file(const std::string& path)
+void HDFSWriter::create_file(const std::string& path, const std::string& header)
 {
 first:
     for (int i = 0; i < 2; i++)
@@ -25,6 +25,10 @@ first:
         if (i == 0)
         {
             set_url("CREATE", path);
+        }
+        else
+        {
+            curl_easy_setopt(_curl.get(), CURLOPT_POSTFIELDS, header.c_str());
         }
         set_curl_opt("PUT");
 
@@ -103,7 +107,18 @@ first:
             if (_response_code == 404)  // file not exists.
             {
                 std::cout << "Creating `/" << path << "`" << std::endl;
-                create_file(path);
+
+                const std::string key = path.substr(0, path.find('/'));
+                std::string header;
+                if (key == "nginx" || key == "apache")
+                {
+                    header = "datetime,ip,request,statusCode,bodyBytes\n";
+                }
+                else
+                {
+                    header = "datetime,logLevel,message\n";
+                }
+                create_file(path, header);
             }
 
             goto first;
