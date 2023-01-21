@@ -1,20 +1,15 @@
 #include <ctime>
-#include <cstdlib>
 
 #include "rapidjson/document.h"
 #include "mqueue_receiver.hpp"
 #include "hdfs_writer.hpp"
-
-void set_time(std::time_t* time, std::tm* tm, std::time_t* date_time);
+#include "logger.hpp"
 
 int main()
 {
-    MQReceiver receiver;
+    MQReceiver receiver{};
     HDFSWriter hdfs_writer{"master", "50070"};
-
-    std::time_t date_t;
-    std::tm     date_tm{};
-    set_time(&date_t, &date_tm, nullptr);
+    Logger     logger{};
 
     std::string msg_date_str;
     std::time_t msg_t;
@@ -46,7 +41,7 @@ int main()
 
         msg = msg.substr(key_len + 1);
 
-        if (msg_t == date_t)
+        if (msg_t == logger.get_date(key))
         {
             hdfs_writer.append_msg(path, msg);
         }
@@ -54,9 +49,9 @@ int main()
         {
             const std::string dst = key + "/" + msg_date_str + "_log.csv";
 
-            if (msg_t > date_t)
+            if (msg_t > logger.get_date(key))
             {
-                set_time(&date_t, nullptr, &msg_t);
+                logger.set_date(key, msg_t);
                 hdfs_writer.rename_file(path, dst);
                 hdfs_writer.append_msg(path, msg);
 
@@ -68,24 +63,5 @@ int main()
     }
 
     return 0;
-}
-
-void set_time(std::time_t* t, std::tm* tm, std::time_t* date_t)
-{
-    if (date_t)
-    {
-        *t = *date_t;
-        return;
-    }
-
-    *t = std::time(nullptr);
-
-    tm = std::localtime(t);
-    tm->tm_hour = 0;
-    tm->tm_min = 0;
-    tm->tm_sec = 0;
-    tm->tm_isdst = -1;
-
-    *t = std::mktime(tm);
 }
 

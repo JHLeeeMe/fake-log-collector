@@ -5,5 +5,5 @@ include_directories(/usr/include)
 include_directories(include)
 link_directories(lib)
 
-add_executable(save-to-hdfs main.cpp mqueue_receiver.cpp hdfs_writer.cpp)
+add_executable(save-to-hdfs main.cpp mqueue_receiver.cpp hdfs_writer.cpp logger.cpp)
 target_link_libraries(save-to-hdfs curl)
