@@ -17,26 +17,7 @@ HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
 HDFSWriter::~HDFSWriter()
 {}
 
-//void HDFSWriter::write(const enum OP& op, const std::string& path, const std::string* msg)
-//{
-//    switch (op)
-//    {
-//    case OP::CREATE:
-//        request_put("CREATE", path);
-//        break;
-//    case OP::APPEND:
-//        request_post(path, *msg);
-//        break;
-//    case OP::RENAME:
-//        request_put("RENAME", path);
-//        break;
-//    default:
-//        assert(false);
-//        break;
-//    }
-//}
-
-void HDFSWriter::create_file(const std::string& path)
+void HDFSWriter::create_file(const std::string& path, const std::string& header)
 {
 first:
     for (int i = 0; i < 2; i++)
@@ -44,6 +25,10 @@ first:
         if (i == 0)
         {
             set_url("CREATE", path);
+        }
+        else
+        {
+            curl_easy_setopt(_curl.get(), CURLOPT_POSTFIELDS, header.c_str());
         }
         set_curl_opt("PUT");
 
@@ -122,7 +107,18 @@ first:
             if (_response_code == 404)  // file not exists.
             {
                 std::cout << "Creating `/" << path << "`" << std::endl;
-                create_file(path);
+
+                const std::string key = path.substr(0, path.find('/'));
+                std::string header;
+                if (key == "nginx" || key == "apache")
+                {
+                    header = "datetime,ip,request,statusCode,bodyBytes\n";
+                }
+                else
+                {
+                    header = "datetime,logLevel,message\n";
+                }
+                create_file(path, header);
             }
 
             goto first;
@@ -138,96 +134,6 @@ first:
     _response.clear();
     _location.clear();
 }
-
-//void HDFSWriter::request_put(const std::string& op_str, const std::string& path)
-//{
-//first:
-//    for (int i = 0; i < 2; i++)
-//    {
-//        if (i == 0)
-//        {
-//            set_url(op_str, path);
-//        }
-//        set_curl_opt("PUT");
-//
-//        curl_perform();
-//
-//        if (i != 0)
-//        {
-//            break;
-//        }
-//
-//        if (_response_code != 200)
-//        {
-//            std::cerr << "Error Code: " << _response_code << std::endl
-//                      << _response << std::endl;
-//            _response.clear();
-//            _location.clear();
-//            curl_easy_reset(_curl.get());
-//
-//            goto first;
-//        }
-//
-//        set_location();
-//
-//        _response.clear();
-//        curl_easy_reset(_curl.get());
-//    }
-//    std::cout << "ok." << std::endl;
-//
-//    _response.clear();
-//    _location.clear();
-//}
-
-//void HDFSWriter::request_post(const std::string& path, const std::string& msg)
-//{
-//first:
-//    for (int i = 0; i < 2; i++)
-//    {
-//        if (i == 0)
-//        {
-//            set_url("APPEND", path);
-//        }
-//        else
-//        {
-//            curl_easy_setopt(_curl.get(), CURLOPT_POSTFIELDS, msg.c_str());
-//        }
-//        set_curl_opt("POST");
-//
-//        curl_perform();
-//
-//        if (i != 0)
-//        {
-//            break;
-//        }
-//
-//        if (_response_code != 200)
-//        {
-//            std::cerr << "Error Code: " << _response_code << std::endl
-//                      << _response << std::endl;
-//            _response.clear();
-//            _location.clear();
-//            curl_easy_reset(_curl.get());
-//
-//            if (_response_code == 404)  // file not exists.
-//            {
-//                std::cout << "Creating `/" << path << "`" << std::endl;
-//                request_put("CREATE", path);
-//            }
-//
-//            goto first;
-//        }
-//
-//        set_location();
-//
-//        _response.clear();
-//        curl_easy_reset(_curl.get());
-//    }
-//    std::cout << "ok." << std::endl;
-//
-//    _response.clear();
-//    _location.clear();
-//}
 
 size_t HDFSWriter::write_callback(char* response_data, size_t size, size_t nmemb, void* user_data)
 {
