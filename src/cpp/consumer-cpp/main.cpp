@@ -5,9 +5,9 @@
 
 #include <rdkafkacpp.h>
 
-#include "consumer_utils.h"
-#include "consumer_configs.h"
-#include "mqueue_sender.h"
+#include "consumer_utils.hpp"
+#include "consumer_configs.hpp"
+#include "mqueue_sender.hpp"
 
 int main()
 {

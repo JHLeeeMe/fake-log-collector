@@ -5,6 +5,9 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
+
 struct Data
 {
     char data[300];

@@ -1,4 +1,4 @@
-#include "consumer_configs.h"
+#include "consumer_configs.hpp"
 
 namespace configs
 {

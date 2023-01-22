@@ -1,73 +1,69 @@
-#include <curl/curl.h>
+#include <ctime>
 
-#include "mqueue_receiver.h"
-
-void set_url(std::string* url,
-             const std::string op,
-             const std::string& path = "",
-             const std::string& addr = "master",
-             const std::string& port = "50070")
-{
-    url->clear();
-    url->append("http://" + addr + ":" + port);
-    url->append("/webhdfs/v1/" + path);
-    url->append("?op=" + op);
-    url->append("&noredirect=true");
-}
-
-size_t write_callback(char* response_data, size_t size, size_t nmemb, void* user_data)
-{
-    ((std::string*)user_data)->append(response_data, size * nmemb);
-
-    return size * nmemb;
-}
+#include "mqueue_receiver.hpp"
+#include "hdfs_writer.hpp"
+#include "date_sync.hpp"
 
 int main()
 {
-    MQReceiver receiver{MQReceiver()};
+    MQReceiver receiver{};
+    HDFSWriter hdfs_writer{"master", "50070"};
+    DateSync   date_sync{};
 
-    ///////////////////////////////////////////////////////////////////////////
-    std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl{curl_easy_init(), &curl_easy_cleanup};
-    if(!curl)
-    {
-        std::cerr << "curl_easy_init() failed..." << std::endl;
-        exit(1);
-    }
+    std::string msg_date_str;
+    std::time_t msg_t;
+    std::tm     msg_tm{};
 
-    CURLcode res;
-
-    std::string url;
-    std::string response;
-
-    set_url(&url, "CREATE", "tmp");
-    curl_easy_setopt(curl.get(), CURLOPT_URL, &url);
-    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-    res = curl_easy_perform(curl.get());
-    if(CURLE_OK != res)
-    {
-        std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        exit(1);
-    }
-
-    std::cout << response << std::endl;
-
-    set_url(&url, "APPEND");
-    curl_easy_setopt(curl.get(), CURLOPT_URL, &url);
-    curl_easy_setopt(curl.get(), CURLOPT_CUSTOMREQUEST, "POST");
-    curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, "hello, webHDFS!");
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
-
-
+    std::unique_ptr<struct MsgBuf> msg_buf;
+    //long type;
+    std::string msg;
+    std::string key;
+    int         key_len;
+    std::string path;
     while (true)
     {
         receiver.recv_msg();
-        //std::unique_ptr<struct MsgBuf> msg = receiver.get_msg();
-        //std::cout << "Type: " << msg->type << std::endl;
-        //std::cout << "Message: " << (msg->payload).data << std::endl;
+        msg_buf = receiver.get_msg();
+
+        //type = msg->type;
+        msg = (msg_buf->payload).data;
+        msg.push_back('\n');
+
+        key_len = msg.find(',');
+        key = msg.substr(0, key_len);
+        path = key + "/log.csv";
+
+        // get date from msg
+        msg_date_str = msg.substr(key_len + 1, msg.find('T', key_len + 1) - (key_len + 1));
+        strptime(msg_date_str.c_str(), "%Y-%m-%d", &msg_tm);
+        msg_t = std::mktime(&msg_tm);
+
+        msg = msg.substr(key_len + 1);
+
+        if (msg_t == date_sync.get_date(key))
+        {
+            hdfs_writer.append_msg(path, msg);
+        }
+        else
+        {
+            std::string dst;
+
+            if (msg_t > date_sync.get_date(key))
+            {
+                char date_str[11];
+                date_sync.date_str(date_str, sizeof(date_str), key);
+                dst = (key + "/" + date_str + "_log.csv");
+
+                date_sync.set_date(key, msg_t);
+                hdfs_writer.rename_file(path, dst);
+                hdfs_writer.append_msg(path, msg);
+
+                continue;
+            }
+
+            dst = (key + "/" + msg_date_str + "_log.csv");
+            hdfs_writer.append_msg(dst, msg);
+        }
     }
 
     return 0;
