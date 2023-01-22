@@ -1,6 +1,6 @@
 #include "mqueue_receiver.hpp"
 
-const auto logger{spdlog::daily_logger_st("MQReceiver", "/workspace/src/cpp/logs/save-to-hdfs/log.txt", 0, 0)};
+const auto logger{spdlog::daily_logger_st("MQReceiver", "/workspace/src/cpp/save-to-hdfs/logs/log.txt", 0, 0)};
 
 MQReceiver::MQReceiver()
     : _key(ftok("/dev/mqueue/", 255))

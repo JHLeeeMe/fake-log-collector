@@ -1,6 +1,6 @@
 #include "hdfs_writer.hpp"
 
-const auto logger{spdlog::daily_logger_st("HDFSWriter", "/workspace/src/cpp/logs/save-to-hdfs/log.txt", 0, 0)};
+const auto logger{spdlog::daily_logger_st("HDFSWriter", "/workspace/src/cpp/save-to-hdfs/logs/log.txt", 0, 0)};
 
 HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
     : _curl(curl_easy_init(), &curl_easy_cleanup)
