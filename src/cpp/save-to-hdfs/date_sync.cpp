@@ -1,26 +1,26 @@
-#include "logger.hpp"
+#include "date_sync.hpp"
 
-Logger::Logger()
+DateSync::DateSync()
 {
     init_date(nullptr);
 }
 
-Logger::Logger(std::time_t&& t)
+DateSync::DateSync(std::time_t&& t)
 {
     init_date(&t);
 }
 
-void Logger::set_date(const std::string& key, const std::time_t& t)
+void DateSync::set_date(const std::string& key, const std::time_t& t)
 {
     _date_map[key] = t;
 }
 
-std::time_t Logger::get_date(const std::string& key)
+std::time_t DateSync::get_date(const std::string& key)
 {
     return _date_map[key];
 }
 
-void Logger::init_date(std::time_t* t)
+void DateSync::init_date(std::time_t* t)
 {
     std::time_t date_t = std::time(t);
 

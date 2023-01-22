@@ -1,6 +1,6 @@
-#include <curl/curl.h>
-
 #include "hdfs_writer.hpp"
+
+const auto logger{spdlog::daily_logger_st("HDFSWriter", "/workspace/src/cpp/logs/save-to-hdfs/log.txt", 0, 0)};
 
 HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
     : _curl(curl_easy_init(), &curl_easy_cleanup)
@@ -9,7 +9,7 @@ HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
 {
     if (!_curl)
     {
-        std::cerr << "curl_easy_init() failed..." << std::endl;
+        logger->error("curl_easy_init() failed...");
         exit(1);
     }
 }
@@ -41,8 +41,7 @@ first:
 
         if (_response_code != 200)
         {
-            std::cerr << "Error Code: " << _response_code << std::endl
-                      << _response << std::endl;
+            logger->error("Error Code: %d", _response_code);
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
@@ -98,15 +97,14 @@ first:
 
         if (_response_code != 200)
         {
-            std::cerr << "Error Code: " << _response_code << std::endl
-                      << _response << std::endl;
+            logger->error("Error Code: %d", _response_code);
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
 
             if (_response_code == 404)  // file not exists.
             {
-                std::cout << "Creating `/" << path << "`" << std::endl;
+                logger->info("Creating `/%s`", path);
 
                 const std::string key = path.substr(0, path.find('/'));
                 std::string header;
@@ -180,7 +178,7 @@ void HDFSWriter::set_location()
         key = m.name.GetString();
         if (key != "Location")
         {
-            std::cerr << m.value.GetString() << std::endl;
+            logger->error(m.value.GetString());
             exit(1);
         }
         _location = m.value.GetString();
@@ -193,7 +191,7 @@ void HDFSWriter::curl_perform()
     _code = curl_easy_perform(_curl.get());
     if (_code != CURLE_OK)
     {
-        std::cerr << "perform() failed: " << curl_easy_strerror(_code) << std::endl;
+        logger->error("perform() failed: %s", curl_easy_strerror(_code));
         exit(1);
     }
 

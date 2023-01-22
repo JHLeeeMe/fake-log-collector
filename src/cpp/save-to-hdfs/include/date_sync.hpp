@@ -4,14 +4,14 @@
 #include <ctime>
 #include <map>
 
-class Logger
+class DateSync
 {
 public:
-    Logger();
-    Logger(std::time_t&& t);
-    Logger(const Logger& l)=delete;
-    Logger(Logger&& l)=delete;
-    ~Logger()=default;
+    DateSync();
+    DateSync(std::time_t&& t);
+    DateSync(const DateSync& l)=delete;
+    DateSync(DateSync&& l)=delete;
+    ~DateSync()=default;
 
     void        set_date(const std::string& key, const std::time_t& t);
     std::time_t get_date(const std::string& key);

@@ -1,15 +1,14 @@
 #include <ctime>
 
-#include "rapidjson/document.h"
 #include "mqueue_receiver.hpp"
 #include "hdfs_writer.hpp"
-#include "logger.hpp"
+#include "date_sync.hpp"
 
 int main()
 {
     MQReceiver receiver{};
     HDFSWriter hdfs_writer{"master", "50070"};
-    Logger     logger{};
+    DateSync   date_sync{};
 
     std::string msg_date_str;
     std::time_t msg_t;
@@ -41,7 +40,7 @@ int main()
 
         msg = msg.substr(key_len + 1);
 
-        if (msg_t == logger.get_date(key))
+        if (msg_t == date_sync.get_date(key))
         {
             hdfs_writer.append_msg(path, msg);
         }
@@ -49,9 +48,9 @@ int main()
         {
             const std::string dst = key + "/" + msg_date_str + "_log.csv";
 
-            if (msg_t > logger.get_date(key))
+            if (msg_t > date_sync.get_date(key))
             {
-                logger.set_date(key, msg_t);
+                date_sync.set_date(key, msg_t);
                 hdfs_writer.rename_file(path, dst);
                 hdfs_writer.append_msg(path, msg);
 
