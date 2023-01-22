@@ -2,12 +2,12 @@
 
 DateSync::DateSync()
 {
-    init_date(nullptr);
+    init_date_map(nullptr);
 }
 
 DateSync::DateSync(std::time_t&& t)
 {
-    init_date(&t);
+    init_date_map(&t);
 }
 
 void DateSync::set_date(const std::string& key, const std::time_t& t)
@@ -20,7 +20,12 @@ std::time_t DateSync::get_date(const std::string& key)
     return _date_map[key];
 }
 
-void DateSync::init_date(std::time_t* t)
+void DateSync::date_str(char* buf, size_t buf_size, const std::string& key)
+{
+    std::strftime(buf, buf_size, "%Y-%m-%d", std::localtime(&_date_map[key]));
+}
+
+void DateSync::init_date_map(std::time_t* t)
 {
     std::time_t date_t = std::time(t);
 

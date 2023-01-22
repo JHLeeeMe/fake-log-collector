@@ -46,10 +46,14 @@ int main()
         }
         else
         {
-            const std::string dst = key + "/" + msg_date_str + "_log.csv";
+            std::string dst;
 
             if (msg_t > date_sync.get_date(key))
             {
+                char date_str[11];
+                date_sync.date_str(date_str, sizeof(date_str), key);
+                dst = (key + "/" + date_str + "_log.csv");
+
                 date_sync.set_date(key, msg_t);
                 hdfs_writer.rename_file(path, dst);
                 hdfs_writer.append_msg(path, msg);
@@ -57,6 +61,7 @@ int main()
                 continue;
             }
 
+            dst = (key + "/" + msg_date_str + "_log.csv");
             hdfs_writer.append_msg(dst, msg);
         }
     }
