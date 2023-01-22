@@ -46,7 +46,10 @@ int main()
         }
         else
         {
-            const std::string dst = key + "/" + msg_date_str + "_log.csv";
+
+            char date_str[11];
+            date_sync.date_str(date_str, sizeof(date_str), key);
+            const std::string dst = key + "/" + date_str + "_log.csv";
 
             if (msg_t > date_sync.get_date(key))
             {
