@@ -5,6 +5,8 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+#include <spdlog/sinks/daily_file_sink.h>
+
 struct Data
 {
     char data[300];
@@ -30,3 +32,4 @@ private:
     struct Data   _payload;
     struct MsgBuf _msg;
 };
+

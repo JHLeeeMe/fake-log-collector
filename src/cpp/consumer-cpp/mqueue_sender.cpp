@@ -1,12 +1,14 @@
 #include "mqueue_sender.hpp"
 
+const auto logger{spdlog::daily_logger_st("MQSender", "/workspace/src/cpp/consumer-cpp/logs/log.txt", 0, 0)};
+
 MQSender::MQSender()
     : _key(ftok("/dev/mqueue/", 255))
 {
     _msg_id = msgget(_key, IPC_CREAT | 0644);
     if (_msg_id < 0)
     {
-        std::cerr << "msgget() failed..." << std::endl;
+        logger->error("msgget() failed...");
         exit(1);
     }
 }
@@ -17,7 +19,7 @@ MQSender::MQSender(std::string& path)
     _msg_id = msgget(_key, IPC_CREAT | 0644);
     if (_msg_id < 0)
     {
-        std::cerr << "msgget() failed..." << std::endl;
+        logger->error("msgget() failed...");
         exit(1);
     }
 }
@@ -31,8 +33,8 @@ MQSender::~MQSender()
 
     if (msgctl(_msg_id, IPC_RMID, nullptr) < 0)
     {
-        std::cerr << "msgctl(..., IPC_RMID, ...) failed..." << std::endl;
-        exit(2);
+        logger->error("msgctl(..., IPC_RMID, ...) failed...");
+        exit(-1);
     }
 }
 
@@ -49,7 +51,8 @@ void MQSender::send_msg(const char* value)
 
     if (msgsnd(_msg_id, &_msg, sizeof(struct MsgBuf), 0) < 0)
     {
-        std::cerr << "msgsnd() failed..." << std::endl;
+        logger->error("msgsnd() failed...");
         exit(2);
     }
 }
+
