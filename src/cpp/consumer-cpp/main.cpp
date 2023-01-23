@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <rdkafkacpp.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #include "consumer_utils.hpp"
 #include "consumer_configs.hpp"
@@ -11,6 +12,8 @@
 
 int main()
 {
+    const auto logger{spdlog::daily_logger_st("main", "/workspace/src/cpp/consumer-cpp/logs/log.txt", 0, 0)};
+
     const std::string brokers{"kafka-single-node:9092"};
     const std::string topic_names{"transformed"};  // e.g. "a,b,c,..."
     std::string       err_str;
@@ -22,7 +25,7 @@ int main()
     std::unique_ptr<RdKafka::KafkaConsumer> consumer{RdKafka::KafkaConsumer::create(config.get(), err_str)};
     if (!consumer)
     {
-        std::cerr << "Failed to create consumer: " << err_str << std::endl;
+        logger->error("Failed to create consumer: {}", err_str);
         exit(1);
     }
 
@@ -32,8 +35,8 @@ int main()
     RdKafka::ErrorCode err = consumer->subscribe(topics);
     if (err)
     {
-       std::cerr << "Failed to subscribe to " << topic_names << ": " << RdKafka::err2str(err) << std::endl;
-       exit(2);
+        logger->error("Failed to subscribe to {}: {}", topic_names, RdKafka::err2str(err));
+        exit(2);
     }
 
     // Create Message Queue Sender
@@ -51,10 +54,8 @@ int main()
         {
             if (msg->err() == RdKafka::ERR__PARTITION_EOF)
             {
-                std::cout << "Reached end of topic "
-                          << msg->topic_name()
-                          << " [" << msg->partition() << "] at offset " << msg->offset()
-                << std::endl;
+                logger->info("Reached end of topic {} [{}] at offset {}",
+                             msg->topic_name(), msg->partition(), msg->offset());
             }
             continue;
         }
