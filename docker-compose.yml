@@ -15,11 +15,10 @@ services:
     depends_on:
       - master
       - kafka-single-node
-     #- influxdb
+      - influxdb
     networks:
       net:
         ipv4_address: 10.0.0.10
-
 
   ##########
   # HADOOP #
@@ -94,35 +93,23 @@ services:
       net:
         ipv4_address: 10.0.0.30
 
-#  ############
-#  # InfluxDB #
-#  ############
-#  influxdb:
-#    image: influxdb:alpine
-#    container_name: influxdb
-#    hostname: influxdb
-#    restart: always
-#    networks:
-#      net:
-#        ipv4_address: 10.0.0.40
+  ############
+  # InfluxDB #
+  ############
+  influxdb:
+    image: influxdb:1.8-alpine
+    container_name: influxdb
+    hostname: influxdb
+    restart: always
+    volumes:
+      - ./Dockers/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+    environment:
+      TZ: "Asia/Seoul"
+      INFLUXDB_DB: "fake_log WITH DURATION 2h REPLICATION 1 SHARD DURATION 1h NAME d_2h_sgd_1h_r_1"
+    networks:
+      net:
+        ipv4_address: 10.0.0.40
 
-#  ##############
-#  # POSTGRESQL #
-#  ##############
-#  postgres:
-#    image: postgres:latest
-#    container_name: postgresql
-#    hostname: postgresql
-#    restart: always
-#    environment:
-#      - POSTGRES_USER=scott
-#      - POSTGRES_PASSWORD=tiger
-#      - POSTGRES_HOST_AUTH_METHOD=trust
-#      - POSTGRES_DB=pipeline_db
-#    networks:
-#      net:
-#        ipv4_address: 10.0.0.40
-#
 #  ###########
 #  # GRAFANA #
 #  ###########
