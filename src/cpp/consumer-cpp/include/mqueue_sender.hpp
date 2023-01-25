@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <cstring>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
