@@ -45,10 +45,9 @@ int main()
     MQSender hdfs_sender{cpp_home + "/save-to-hdfs"};
     MQSender influxdb_sender{cpp_home + "/write-to-influxdb"};
 
-    std::unique_ptr<RdKafka::Message> msg{};
     while (true)
     {
-        msg = consumer->consume(1000);
+        std::unique_ptr<RdKafka::Message> msg{consumer->consume(1000)};
         if (!msg)
         {
             continue;
