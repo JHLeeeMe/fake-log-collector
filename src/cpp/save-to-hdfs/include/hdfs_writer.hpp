@@ -3,10 +3,8 @@
 #include <iostream>
 
 #include <curl/curl.h>
-#include <spdlog/spdlog.h>
+#include <rapidjson/document.h>
 #include <spdlog/sinks/daily_file_sink.h>
-
-#include "rapidjson/document.h"
 
 class HDFSWriter
 {
