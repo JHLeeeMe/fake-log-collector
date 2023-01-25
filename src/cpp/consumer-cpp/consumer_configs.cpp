@@ -12,7 +12,7 @@ std::unique_ptr<RdKafka::Conf> create_consumer_config(
         bool enable_auto_commit)
 {
     std::unique_ptr<RdKafka::Conf> config{RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
-    std::string err_str;
+    std::string err_str{};
 
     if (config->set("bootstrap.servers", brokers, err_str) != RdKafka::Conf::CONF_OK)
     {
@@ -26,7 +26,7 @@ std::unique_ptr<RdKafka::Conf> create_consumer_config(
         exit(12);
     }
 
-    std::string state;
+    std::string state{};
     switch (auto_offset_reset)
     {
     case AutoOffsetReset::EARLIEST:
