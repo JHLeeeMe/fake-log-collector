@@ -41,10 +41,8 @@ int main()
 
     // Create Message Queue Senders
     const std::string cpp_home = "/workspace/src/cpp";
-    const std::string hdfs_path = cpp_home + "/save-to-hdfs";
-    const std::string influxdb_path = cpp_home + "/write-to-influxdb";
-    MQSender hdfs_sender{MQSender(hdfs_path)};
-    MQSender influxdb_sender{MQSender(influxdb_path)};
+    MQSender hdfs_sender{cpp_home + "/save-to-hdfs"};
+    MQSender influxdb_sender{cpp_home + "/write-to-influxdb"};
 
     while (true)
     {
@@ -66,11 +64,10 @@ int main()
 
         std::stringstream ss;
         ss << *(msg->key()) << "," << static_cast<const char*>(msg->payload());
+
         influxdb_sender.send_msg(ss.str().c_str());
         hdfs_sender.send_msg(ss.str().c_str());
     }
-
-    consumer->close();
 
     return 0;
 }
