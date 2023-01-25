@@ -13,7 +13,7 @@ MQReceiver::MQReceiver()
     }
 }
 
-MQReceiver::MQReceiver(std::string& path)
+MQReceiver::MQReceiver(const std::string& path)
     : _key(ftok(path.c_str(), 255))
 {
     _msg_id = msgget(_key, IPC_CREAT | 0644);

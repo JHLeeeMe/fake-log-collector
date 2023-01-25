@@ -23,7 +23,7 @@ class MQReceiver
 {
 public:
     MQReceiver();
-    MQReceiver(std::string&);
+    MQReceiver(const std::string&);
     ~MQReceiver();
 public:
     void                           recv_msg();
