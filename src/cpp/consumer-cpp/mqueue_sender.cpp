@@ -13,7 +13,7 @@ MQSender::MQSender()
     }
 }
 
-MQSender::MQSender(std::string& path)
+MQSender::MQSender(const std::string& path)
     : _key(ftok(path.c_str(), 255))
 {
     _msg_id = msgget(_key, IPC_CREAT | 0644);

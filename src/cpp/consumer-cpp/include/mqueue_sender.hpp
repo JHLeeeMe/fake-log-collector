@@ -22,7 +22,7 @@ class MQSender
 {
 public:
     MQSender();
-    MQSender(std::string&);
+    MQSender(const std::string&);
     ~MQSender();
 public:
     void send_msg(const char*);
