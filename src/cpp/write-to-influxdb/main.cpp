@@ -1,40 +1,15 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
 #include "mqueue_receiver.hpp"
+#include "influxdb_writer.hpp"
 
 int main()
 {
-    struct hostent* host_entry{gethostbyname("influxdb")};
-    if (!host_entry)
-    {
-        std::cerr << "gethostbyname(...) failed..." << std::endl;
-        return 1;
-    }
-
-    const char* server_ip{inet_ntoa(*((struct in_addr*)host_entry->h_addr_list[0]))};
-
-    const int port{8089};
-
-    struct sockaddr_in s_sockaddr_info;
-    std::memset(&s_sockaddr_info, 0x00, sizeof(s_sockaddr_info));
-    s_sockaddr_info.sin_family = AF_INET;
-    s_sockaddr_info.sin_addr.s_addr = inet_addr(server_ip);
-    s_sockaddr_info.sin_port = htons(port);
-
-    int c_socket{socket(AF_INET, SOCK_DGRAM, 0)};
-    if (c_socket < 0)
-    {
-        std::cerr << "Error creating socket" << std::endl;
-        return 1;
-    }
+    const auto logger{spdlog::daily_logger_st("main", "/workspace/src/cpp/write-to-influxdb/logs/log.txt", 0, 0)};
 
     std::unique_ptr<char> cwd{get_current_dir_name()};
     std::string cwd_str{cwd.get()};
-    //MQReceiver receiver{cwd.get()};
+
     MQReceiver receiver{cwd_str.substr(0, cwd_str.find_last_of('/'))};
+    InfluxDBWriter influxdb_writer{"influxdb", 8089};
 
     std::unique_ptr<struct MsgBuf> msg_buf;
     std::string msg;
@@ -57,11 +32,9 @@ int main()
 
         std::cout << "Data: " << data << std::endl;
 
-        if (sendto(c_socket, data.c_str(), data.length(), 0,
-                   (struct sockaddr*)&s_sockaddr_info, sizeof(s_sockaddr_info)) < 0)
+        if (influxdb_writer.sendto(data) < 0)
         {
-            std::cerr << "sendto(...) failed..." << std::endl;
-            close(c_socket);
+            logger->error("influxdb_writer.sendto(data) failed...");
             return 1;
         }
 
@@ -69,8 +42,6 @@ int main()
 
         std::cout << "UDP request sent successfully." << std::endl;
     }
-
-    close(c_socket);
 
     return 0;
 }
