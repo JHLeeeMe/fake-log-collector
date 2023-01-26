@@ -101,6 +101,8 @@ services:
     container_name: influxdb
     hostname: influxdb
     restart: always
+    ports:
+      - 8086:8086
     volumes:
       - ./Dockers/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     environment:
@@ -110,24 +112,24 @@ services:
       net:
         ipv4_address: 10.0.0.40
 
-#  ###########
-#  # GRAFANA #
-#  ###########
-#  grafana:
-#    image: grafana/grafana:latest
-#    container_name: grafana
-#    hostname: grafana
-#    restart: always
-#    ports:
-#      - 3000:3000
-#    environment:
-#      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
-#    depends_on:
-#      - postgres
-#      - kafka-single-node
-#    networks:
-#      net:
-#        ipv4_address: 10.0.0.50
+  ###########
+  # GRAFANA #
+  ###########
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      TZ: "Asia/Seoul"
+    depends_on:
+      - influxdb
+      - kafka-single-node
+    networks:
+      net:
+        ipv4_address: 10.0.0.50
 
 ############
 # Networks #
