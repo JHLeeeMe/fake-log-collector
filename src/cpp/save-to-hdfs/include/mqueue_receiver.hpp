@@ -5,7 +5,6 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
 struct Data
@@ -23,7 +22,7 @@ class MQReceiver
 {
 public:
     MQReceiver();
-    MQReceiver(std::string&);
+    MQReceiver(const std::string&);
     ~MQReceiver();
 public:
     void                           recv_msg();

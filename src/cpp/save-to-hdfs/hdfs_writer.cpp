@@ -41,7 +41,7 @@ first:
 
         if (_response_code != 200)
         {
-            logger->error("Error Code: %d", _response_code);
+            logger->error("Error Code: {}", _response_code);
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
@@ -97,14 +97,14 @@ first:
 
         if (_response_code != 200)
         {
-            logger->error("Error Code: %d", _response_code);
+            logger->error("Error Code: {}", _response_code);
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
 
             if (_response_code == 404)  // file not exists.
             {
-                logger->info("Creating `/%s`", path);
+                logger->info("Creating `/{}`", path);
 
                 const std::string key = path.substr(0, path.find('/'));
                 std::string header;
@@ -191,7 +191,7 @@ void HDFSWriter::curl_perform()
     _code = curl_easy_perform(_curl.get());
     if (_code != CURLE_OK)
     {
-        logger->error("perform() failed: %s", curl_easy_strerror(_code));
+        logger->error("perform() failed: {}", curl_easy_strerror(_code));
         exit(1);
     }
 

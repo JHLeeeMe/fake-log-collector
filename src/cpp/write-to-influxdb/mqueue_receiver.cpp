@@ -1,9 +1,9 @@
 #include "mqueue_receiver.hpp"
 
-const auto logger{spdlog::daily_logger_st("MQReceiver", "/workspace/src/cpp/save-to-hdfs/logs/log.txt", 0, 0)};
+const auto logger{spdlog::daily_logger_st("MQReceiver", "/workspace/src/cpp/write-to-influxdb/logs/log.txt", 0, 0)};
 
 MQReceiver::MQReceiver()
-    : _key(ftok("/dev/mqueue/", 255))
+    : _key(ftok("/workspace/src/cpp/write-to-influxdb/", 255))
 {
     _msg_id = msgget(_key, IPC_CREAT | 0644);
     if (_msg_id < 0)

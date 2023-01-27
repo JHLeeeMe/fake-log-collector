@@ -1,9 +1,11 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+#include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
 struct Data
@@ -17,18 +19,18 @@ struct MsgBuf
     struct Data payload;
 };
 
-class MQSender
+class MQReceiver
 {
 public:
-    MQSender();
-    MQSender(const std::string&);
-    ~MQSender();
+    MQReceiver();
+    MQReceiver(const std::string&);
+    ~MQReceiver();
 public:
-    void send_msg(const char*);
+    void                           recv_msg();
+    std::unique_ptr<struct MsgBuf> get_msg();
 private:
     key_t         _key;
     int           _msg_id;
-    struct Data   _payload;
     struct MsgBuf _msg;
 };
 
