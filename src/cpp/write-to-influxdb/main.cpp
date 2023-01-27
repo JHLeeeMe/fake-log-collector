@@ -1,5 +1,13 @@
+#include <vector>
+#include <sstream>
+
 #include "mqueue_receiver.hpp"
 #include "influxdb_writer.hpp"
+
+void set_data(std::string* data, std::string* msg);
+void make_line_protocol(std::string* data,
+        const std::string& measurement, const std::string& tag, const std::string& value);
+void split(std::vector<std::string>* vec, const std::string& value);
 
 int main()
 {
@@ -21,15 +29,9 @@ int main()
         msg_buf = receiver.get_msg();
         msg = (msg_buf->payload).data;
 
-        key = msg.substr(0, msg.find(','));
-        msg = msg.substr(key.length() + 1);
+        set_data(&data, &msg);
 
         std::cout << "Message: " << msg << std::endl;
-
-        data.append("log,tag1=" + key);
-        data.append(" from=\"write-to-influxdb\"");
-        data += '\n';
-
         std::cout << "Data: " << data << std::endl;
 
         if (influxdb_writer.sendto(data) < 0)
@@ -44,5 +46,48 @@ int main()
     }
 
     return 0;
+}
+
+void set_data(std::string* data, std::string* msg)
+{
+    std::string key{msg->substr(0, msg->find(','))};
+    *msg = msg->substr(key.length() + 1);
+
+    make_line_protocol(data, "log", key, *msg);
+}
+
+void make_line_protocol(std::string* data,
+        const std::string& measurement, const std::string& tag, const std::string& value)
+{
+    data->append(measurement);
+    data->append(",key=" + tag);
+
+    std::vector<std::string> vec{};
+    split(&vec, value);
+    if (tag == "flask")
+    {
+        data->append(" logLevel=\"" + vec[1] + "\"");
+        data->append(",msg=\"" + vec[2] + "\"");
+    }
+    else
+    {
+        data->append(" remoteAddr=\"" + vec[1] + "\"");
+        data->append(",request=\"" + vec[2] + "\"");
+        data->append(",statusCode=\"" + vec[3] + "\"");
+        data->append(",bodyBytesSent=\"" + vec[4] + "\"");
+    }
+    data->push_back('\n');
+}
+
+void split(std::vector<std::string>* vec, const std::string& value)
+{
+    vec->clear();
+
+    std::istringstream iss{value};
+    std::string buf;
+    while (std::getline(iss, buf, ','))
+    {
+        vec->push_back(buf);
+    }
 }
 
