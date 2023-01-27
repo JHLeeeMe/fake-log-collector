@@ -1,4 +1,4 @@
-#include <iostream>
+#include <sstream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -12,10 +12,14 @@ public:
     InfluxDBWriter(const InfluxDBWriter&)=delete;
     ~InfluxDBWriter();
 public:
-    const int sendto(const std::string& data) const;
+    const int send(const std::string& data) const;
+    void set_data(std::string* data, const std::string& msg) const;
 private:
     void set_ip(const char* ip);
     void set_sockaddr_info();
+    void make_line_protocol(std::string* data,
+            const std::string& measurement, const std::string& tag, const std::string& value) const;
+    void split(std::vector<std::string>* vec, const std::string& value) const;
 private:
     int                _sockfd;
 

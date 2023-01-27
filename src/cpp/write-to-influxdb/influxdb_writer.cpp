@@ -20,10 +20,16 @@ InfluxDBWriter::~InfluxDBWriter()
     ::close(_sockfd);
 }
 
-const int InfluxDBWriter::sendto(const std::string& data) const
+const int InfluxDBWriter::send(const std::string& data) const
 {
     return ::sendto(_sockfd, data.c_str(), data.length(), 0,
                     (struct sockaddr*)&_sockaddr_info, sizeof(_sockaddr_info));
+}
+
+void InfluxDBWriter::set_data(std::string* data, const std::string& msg) const
+{
+    const std::string key{msg.substr(0, msg.find(','))};
+    make_line_protocol(data, "log", key, msg);
 }
 
 void InfluxDBWriter::set_ip(const char* ip)
@@ -45,5 +51,40 @@ void InfluxDBWriter::set_sockaddr_info()
     _sockaddr_info.sin_family = AF_INET;
     _sockaddr_info.sin_addr.s_addr = inet_addr(_ip);
     _sockaddr_info.sin_port = htons(_port);
+}
+
+void InfluxDBWriter::make_line_protocol(std::string* data,
+        const std::string& measurement, const std::string& tag, const std::string& value) const
+{
+    data->append(measurement);
+    data->append(",key=" + tag);
+
+    std::vector<std::string> vec{};
+    split(&vec, value);
+    if (tag == "flask")
+    {
+        data->append(" logLevel=\"" + vec[2] + "\"");
+        data->append(",msg=\"" + vec[3] + "\"");
+    }
+    else
+    {
+        data->append(" remoteAddr=\"" + vec[2] + "\"");
+        data->append(",request=\"" + vec[3] + "\"");
+        data->append(",statusCode=" + vec[4]);
+        data->append(",bodyBytesSent=" + vec[5]);
+    }
+    data->push_back('\n');
+}
+
+void InfluxDBWriter::split(std::vector<std::string>* vec, const std::string& value) const
+{
+    vec->clear();
+
+    std::istringstream iss{value};
+    std::string buf;
+    while (std::getline(iss, buf, ','))
+    {
+        vec->push_back(buf);
+    }
 }
 
