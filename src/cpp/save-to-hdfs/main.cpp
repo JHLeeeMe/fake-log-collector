@@ -4,10 +4,7 @@
 
 int main()
 {
-    std::unique_ptr<char> cwd{get_current_dir_name()};
-    std::string cwd_str{cwd.get()};
-
-    MQReceiver receiver{cwd_str.substr(0, cwd_str.find_last_of('/'))};
+    MQReceiver receiver{"/workspace/src/cpp/save-to-hdfs"};
     HDFSWriter hdfs_writer{"master", "50070"};
     DateSync   date_sync{};
 
