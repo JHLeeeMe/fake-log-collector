@@ -5,9 +5,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class DateFormatConverter {
-    private static final DateTimeFormatter DEFAULT_INPUT_FORMATTER = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z").withLocale(Locale.US);
-    private static final DateTimeFormatter FLASK_INPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter DEFAULT_INPUT_FORMATTER =
+        DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z").withLocale(Locale.US);
+    private static final DateTimeFormatter FLASK_INPUT_FORMATTER =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter OUTPUT_FORMATTER =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 
     public static String convert(String key, String inputTimestamp) {
         if (key.equals("flask")) {
