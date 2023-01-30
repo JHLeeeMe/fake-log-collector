@@ -25,9 +25,17 @@ for i in $(seq 1 10); do
     sleep 3
 done
 
-./bin/compile-transformer.sh
-./bin/compile-consumer.sh
-./bin/start-producer.sh &
-#./bin/start-transformer.sh &
-#./bin/start-consumer.sh &
+echo "Compile..."
+/workspace/src/bin/compile-transformer.sh
+/workspace/src/bin/compile-consumer_cpp.sh
+/workspace/src/bin/compile-save_to_hdfs.sh
+/workspace/src/bin/compile-write_to_influxdb.sh
+
+# Exec
+/workspace/src/bin/start-producer.sh
+/workspace/src/bin/start-write_to_influxdb.sh
+/workspace/src/bin/start-save_to_hdfs.sh
+/workspace/src/bin/start-consumer_cpp.sh
+/workspace/src/bin/start-transformer.sh
+
 /bin/bash
