@@ -1,4 +1,4 @@
-"""log_generator.py
+"""main.py
 
 Fake Log Generator
   (Nginx, Apache, Flask, ...)

@@ -9,14 +9,15 @@ EOF
 
 PROJECT_ROOT=/workspace
 JAVA_ROOT=${PROJECT_ROOT}/src/java
-LIB=${JAVA_ROOT}/lib
+TRANSFORMER_PATH=${JAVA_ROOT}/transformer
+LIB=${TRANSFORMER_PATH}/lib
 
-if [[ -d ${JAVA_ROOT}/target/ ]]; then
-    rm -rf ${JAVA_ROOT}/target
+if [[ -d ${TRANSFORMER_PATH}/target/ ]]; then
+    rm -rf ${TRANSFORMER_PATH}/target
 fi
 
-echo "compile Transformer.java & TransformerTopology.java"
+echo "compile Transformer"
 javac \
     -cp ${LIB}/kafka-clients-3.3.1.jar:${LIB}/kafka-streams-3.3.1.jar \
-    -d ${JAVA_ROOT}/target/ \
-    ${JAVA_ROOT}/*.java
+    -d ${TRANSFORMER_PATH}/target/ \
+    ${TRANSFORMER_PATH}/*.java
