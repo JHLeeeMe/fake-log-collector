@@ -2,15 +2,15 @@
 
 
 cat <<EOF
-# ----------------------- #
-#   compile-consumer.sh   #
-# ----------------------- #
+# ------------------------- #
+#  compile-consumer_cpp.sh  #
+# ------------------------- #
 EOF
 
 PROJECT_ROOT=/workspace
 CPP_ROOT=${PROJECT_ROOT}/src/cpp
 CONSUMER_CPP_ROOT=${CPP_ROOT}/consumer-cpp
-CONSUMER_CPP_LIB=${CONSUMER_CPP_ROOT}/lib
+LIB=${CONSUMER_CPP_ROOT}/lib
 
 if [[ -d ${CONSUMER_CPP_ROOT}/build/ ]]; then
     rm -rf ${CONSUMER_CPP_ROOT}/build
