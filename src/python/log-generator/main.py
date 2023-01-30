@@ -4,6 +4,7 @@ Fake Log Generator
   (Nginx, Apache, Flask, ...)
 
 Attributes:
+    logger: Logger
     fake: Faker
     log_elem: LogElements
 
@@ -161,7 +162,7 @@ def send_to_topic(producer: KafkaProducer, key: str, topic: str = 'raw'):
         producer.send(topic,
                       key=bytes(key, 'utf8'), value=bytes(fake_log, 'utf8'))
 
-        print(f'{os.getpid()}(pid): log send to "{topic}" topic.')
+        print(f'log-generator({os.getpid()}): log send to "{topic}" topic.')
         time.sleep(random.uniform(0.1, 3))
 
 

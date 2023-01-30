@@ -2,7 +2,7 @@ from kafka.admin import KafkaAdminClient, ConfigResource, ConfigResourceType, Ne
 
 
 def create_topic(topic: str, num_partitions: int = 3, replica: int = 1):
-    admin_client = KafkaAdminClient(bootstrap_servers=['kafka-single-node:9092'])
+    admin_client = get_admin_client()
 
     topic_config = {
             'retention.ms': 1 * 3600 * 1000,                # 1 hour
@@ -18,13 +18,13 @@ def create_topic(topic: str, num_partitions: int = 3, replica: int = 1):
 
 
 def delete_topic(topic: str):
-    admin_client = KafkaAdminClient(bootstrap_servers=['kafka-single-node:9092'])
+    admin_client = get_admin_client()
     admin_client.delete_topics(topics=topic)
     admin_client.close()
 
 
 def describe_configs(topic: str):
-    admin_client = KafkaAdminClient(bootstrap_servers=['kafka-single-node:9092'])
+    admin_client = get_admin_client()
     assert (topic in admin_client.list_topics())
 
     resource = ConfigResource(resource_type=ConfigResourceType.TOPIC, name=topic)
@@ -36,7 +36,7 @@ def describe_configs(topic: str):
 def alter_retention_policy(topic: str, hour: float = 0.5):
     assert (hour > 0)
 
-    admin_client = KafkaAdminClient(bootstrap_servers=['kafka-single-node:9092'])
+    admin_client = get_admin_client()
     assert (topic in admin_client.list_topics())
 
     retention_ms = hour * 3600 * 1000                    # 1 hour
@@ -50,4 +50,8 @@ def alter_retention_policy(topic: str, hour: float = 0.5):
 
     admin_client.alter_configs(config_resources=[resource])
     admin_client.close()
+
+
+def get_admin_client() -> KafkaAdminClient:
+    return KafkaAdminClient(bootstrap_servers=['kafka-single-node:9092'])
 
