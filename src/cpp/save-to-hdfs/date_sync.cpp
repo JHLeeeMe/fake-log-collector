@@ -27,8 +27,7 @@ void DateSync::date_str(char* buf, size_t buf_size, const std::string& key)
 
 void DateSync::init_date_map(std::time_t* t)
 {
-    std::time_t date_t = std::time(t);
-
+    std::time_t date_t{std::time(t)};
     std::tm tm{*std::localtime(&date_t)};
     tm.tm_hour = 0;
     tm.tm_min = 0;

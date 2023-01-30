@@ -54,7 +54,6 @@ first:
         _response.clear();
         curl_easy_reset(_curl.get());
     }
-    std::cout << "ok." << std::endl;
 
     _response.clear();
     _location.clear();
@@ -67,7 +66,6 @@ void HDFSWriter::rename_file(const std::string& path, const std::string& dst)
     set_curl_opt("PUT");
 
     curl_perform();
-    std::cout << "ok." << std::endl;
 
     _response.clear();
     curl_easy_reset(_curl.get());
@@ -97,7 +95,6 @@ first:
 
         if (_response_code != 200)
         {
-            logger->error("Error Code: {}", _response_code);
             _response.clear();
             _location.clear();
             curl_easy_reset(_curl.get());
@@ -106,8 +103,8 @@ first:
             {
                 logger->info("Creating `/{}`", path);
 
-                const std::string key = path.substr(0, path.find('/'));
-                std::string header;
+                const std::string key{path.substr(0, path.find('/'))};
+                std::string header{};
                 if (key == "nginx" || key == "apache")
                 {
                     header = "datetime,ip,request,statusCode,bodyBytes\n";
@@ -127,7 +124,7 @@ first:
         _response.clear();
         curl_easy_reset(_curl.get());
     }
-    std::cout << "ok." << std::endl;
+    logger->info("Appended to HDFS.");
 
     _response.clear();
     _location.clear();
@@ -169,10 +166,10 @@ void HDFSWriter::set_curl_opt(const std::string& method)
 
 void HDFSWriter::set_location()
 {
-    rapidjson::Document doc;
+    rapidjson::Document doc{};
     doc.Parse(_response.c_str());
 
-    std::string key;
+    std::string key{};
     for (const auto& m : doc.GetObject())
     {
         key = m.name.GetString();
