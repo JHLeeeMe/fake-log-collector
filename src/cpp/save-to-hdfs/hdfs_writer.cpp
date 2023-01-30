@@ -124,7 +124,7 @@ first:
         _response.clear();
         curl_easy_reset(_curl.get());
     }
-    logger->info("Appended to HDFS.");
+    std::cout << "Appended to HDFS." << std::endl;
 
     _response.clear();
     _location.clear();
