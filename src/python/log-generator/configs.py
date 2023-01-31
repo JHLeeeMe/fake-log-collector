@@ -19,7 +19,7 @@ def create_topic(topic: str, num_partitions: int = 3, replica: int = 1):
 
 def delete_topic(topic: str):
     admin_client = get_admin_client()
-    admin_client.delete_topics(topics=topic)
+    admin_client.delete_topics(topics=[topic])
     admin_client.close()
 
 
