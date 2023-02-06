@@ -11,7 +11,6 @@ class HDFSWriter
 public:
     HDFSWriter(const std::string& addr = "master",
                const std::string& port = "50070");
-    ~HDFSWriter();
 public:
     void create_file(const std::string& path, const std::string& header);
     void rename_file(const std::string& path, const std::string& dst);
