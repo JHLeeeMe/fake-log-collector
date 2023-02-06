@@ -103,11 +103,12 @@ services:
     restart: always
     ports:
       - 8086:8086
-    volumes:
-      - ./Dockers/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     environment:
       TZ: "Asia/Seoul"
-      INFLUXDB_DB: "fake_log WITH DURATION 2h REPLICATION 1 SHARD DURATION 1h NAME d_2h_sgd_1h_r_1"
+    volumes:
+      - ./Dockers/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+      - ./Dockers/influxdb/init-influxdb.sh:/init-influxdb.sh
+      - ./Dockers/influxdb/bootstrap.sh:/bootstrap.sh
     networks:
       net:
         ipv4_address: 10.0.0.40
