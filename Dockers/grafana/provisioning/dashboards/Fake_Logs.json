@@ -1,0 +1,610 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 164
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "statusCode"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 102
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "request"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 331
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 13,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 6,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "Nginx",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT remoteAddr, request, statusCode, bodyBytesSent\nFROM log\nWHERE (\"key\" = 'nginx') AND (time >= now() - 1h)\nORDER BY desc",
+          "rawQuery": true,
+          "refId": "Nginx",
+          "resultFormat": "table"
+        }
+      ],
+      "title": "Nginx",
+      "type": "table"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 5,
+        "x": 13,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "Nginx",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT count(statusCode)\nFROM log\nWHERE \"key\" = 'nginx' AND statusCode != 200",
+          "rawQuery": true,
+          "refId": "Nginx",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Nginx (statusCode != 200)",
+      "type": "stat"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 23,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "Nginx",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT count(request)\nFROM log\nWHERE \"key\" = 'nginx'",
+          "rawQuery": true,
+          "refId": "Nginx",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "Apache",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "hide": false,
+          "query": "SELECT count(request)\nFROM log\nWHERE \"key\" = 'apache'",
+          "rawQuery": true,
+          "refId": "Apache",
+          "resultFormat": "time_series"
+        },
+        {
+          "alias": "Flask",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "hide": false,
+          "query": "SELECT count(msg)\nFROM log\nWHERE \"key\" = 'flask'",
+          "rawQuery": true,
+          "refId": "Flask",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Total request count",
+      "type": "stat"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 164
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "request"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 338
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "statusCode"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 93
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 13,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 6,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "Apache",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT remoteAddr, request, statusCode, bodyBytesSent\nFROM log\nWHERE (\"key\" = 'apache') AND (time >= now() - 1h)\nORDER BY desc",
+          "rawQuery": true,
+          "refId": "Apache",
+          "resultFormat": "table"
+        }
+      ],
+      "title": "Apache",
+      "type": "table"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 5,
+        "x": 13,
+        "y": 8
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "Apache",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT count(statusCode)\nFROM log\nWHERE \"key\" = 'apache' AND statusCode != 200",
+          "rawQuery": true,
+          "refId": "Apache",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Apache (statusCode != 200)",
+      "type": "stat"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 164
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "logLevel"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 309
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "msg"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 515
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 13,
+        "x": 0,
+        "y": 16
+      },
+      "id": 4,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 6,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "Nginx",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT msg, logLevel\nFROM log\nWHERE (\"key\" = 'flask') AND (time >= now() - 1h)\nORDER BY desc",
+          "rawQuery": true,
+          "refId": "Nginx",
+          "resultFormat": "table"
+        }
+      ],
+      "title": "Flask",
+      "type": "table"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 13,
+        "y": 16
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.2.6",
+      "targets": [
+        {
+          "alias": "flask",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "a1IVAVAVk"
+          },
+          "query": "SELECT count(logLevel)\nFROM log\nWHERE \"key\" = 'flask' AND logLevel = 'ERROR'",
+          "rawQuery": true,
+          "refId": "Flask",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Flask (logLevel = 'ERROR')",
+      "type": "stat"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Fake Logs",
+  "uid": "NfMOJ404k",
+  "version": 1,
+  "weekStart": ""
+}

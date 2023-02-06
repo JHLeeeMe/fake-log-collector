@@ -145,6 +145,9 @@ services:
       - 3000:3000
     environment:
       TZ: "Asia/Seoul"
+    volumes:
+      - ./Dockers/grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
+      - ./Dockers/grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/
     depends_on:
       - influxdb
       - kafka-single-node
