@@ -8,6 +8,10 @@ if [[ -d ${PROJECT_ROOT}/tmpfs ]]; then
     sudo rm -rf ${PROJECT_ROOT}/tmpfs
 fi
 
+if [[ ! -e ${PROJECT_ROOT}/.env ]]; then
+    echo "DOCKER_SOCK_GROUP=$(stat -c '%g' /var/run/docker.sock)" > ${PROJECT_ROOT}/.env
+fi
+
 CMD=$1
 if [[ $CMD == "-d" ]]; then
     docker-compose -f ${PROJECT_ROOT}/docker-compose.yml up -d
