@@ -14,9 +14,6 @@ HDFSWriter::HDFSWriter(const std::string& addr, const std::string& port)
     }
 }
 
-HDFSWriter::~HDFSWriter()
-{}
-
 void HDFSWriter::create_file(const std::string& path, const std::string& header)
 {
 first:
