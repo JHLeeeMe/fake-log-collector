@@ -81,7 +81,7 @@ void InfluxDBWriter::split(std::vector<std::string>* vec, const std::string& val
     vec->clear();
 
     std::istringstream iss{value};
-    std::string buf;
+    std::string buf{};
     while (std::getline(iss, buf, ','))
     {
         vec->push_back(buf);
