@@ -176,6 +176,9 @@ if __name__ == '__main__':
     except errors.TopicAlreadyExistsError:
         configs.delete_topic(topic='raw')
         configs.create_topic(topic='raw', num_partitions=3, replica=1)
+    except Exception as e:
+        logger.error(e)
+        exit()
 
     producer: KafkaProducer | None = None
     for i in range(5):
