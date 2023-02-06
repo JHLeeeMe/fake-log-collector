@@ -21,7 +21,7 @@ services:
         ipv4_address: 10.0.0.10
 
   ##########
-  # HADOOP #
+  # Hadoop #
   ##########
   master:
     image: jhleeeme/hadoop:3.2.1-ubuntu18.04
@@ -78,7 +78,7 @@ services:
         ipv4_address: 10.0.0.23
 
   #########
-  # KAFKA #
+  # Kafka #
   #########
   kafka-single-node:
     image: jhleeeme/kafka-single-node:2.13-3.1.1-alpine
@@ -103,17 +103,38 @@ services:
     restart: always
     ports:
       - 8086:8086
-    volumes:
-      - ./Dockers/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
     environment:
       TZ: "Asia/Seoul"
-      INFLUXDB_DB: "fake_log WITH DURATION 2h REPLICATION 1 SHARD DURATION 1h NAME d_2h_sgd_1h_r_1"
+    volumes:
+      - ./Dockers/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
+      - ./Dockers/influxdb/init-influxdb.sh:/init-influxdb.sh
+      - ./Dockers/influxdb/bootstrap.sh:/bootstrap.sh
     networks:
       net:
         ipv4_address: 10.0.0.40
 
+  ############
+  # Telegraf #
+  ############
+  telegraf:
+    image: telegraf:1.25-alpine
+    container_name: telegraf
+    hostname: telegraf
+    restart: always
+    user: "telegraf:${DOCKER_SOCK_GROUP}"
+    environment:
+      TZ: "Asia/Seoul"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./Dockers/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - fake-log-collector
+    networks:
+      net:
+        ipv4_address: 10.0.0.50
+
   ###########
-  # GRAFANA #
+  # Grafana #
   ###########
   grafana:
     image: grafana/grafana:latest
@@ -129,7 +150,7 @@ services:
       - kafka-single-node
     networks:
       net:
-        ipv4_address: 10.0.0.50
+        ipv4_address: 10.0.0.60
 
 ############
 # Networks #

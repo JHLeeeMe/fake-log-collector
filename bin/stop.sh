@@ -9,3 +9,8 @@ if [[ -d ${PROJECT_ROOT}/tmpfs ]]; then
 fi
 
 docker-compose -f ${PROJECT_ROOT}/docker-compose.yml down
+
+if [[ -e ${PROJECT_ROOT}/.env ]]; then
+    rm -rf ${PROJECT_ROOT}/.env
+fi
+
