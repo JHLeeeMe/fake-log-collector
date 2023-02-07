@@ -24,12 +24,15 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -116,7 +119,7 @@
           "alias": "Nginx",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT remoteAddr, request, statusCode, bodyBytesSent\nFROM log\nWHERE (\"key\" = 'nginx') AND (time >= now() - 1h)\nORDER BY desc",
           "rawQuery": true,
@@ -128,7 +131,10 @@
       "type": "table"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -176,7 +182,7 @@
           "alias": "Nginx",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT count(statusCode)\nFROM log\nWHERE \"key\" = 'nginx' AND statusCode != 200",
           "rawQuery": true,
@@ -188,7 +194,10 @@
       "type": "stat"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -236,7 +245,7 @@
           "alias": "Nginx",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT count(request)\nFROM log\nWHERE \"key\" = 'nginx'",
           "rawQuery": true,
@@ -247,7 +256,7 @@
           "alias": "Apache",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "hide": false,
           "query": "SELECT count(request)\nFROM log\nWHERE \"key\" = 'apache'",
@@ -259,7 +268,7 @@
           "alias": "Flask",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "hide": false,
           "query": "SELECT count(msg)\nFROM log\nWHERE \"key\" = 'flask'",
@@ -272,7 +281,10 @@
       "type": "stat"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -359,7 +371,7 @@
           "alias": "Apache",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT remoteAddr, request, statusCode, bodyBytesSent\nFROM log\nWHERE (\"key\" = 'apache') AND (time >= now() - 1h)\nORDER BY desc",
           "rawQuery": true,
@@ -371,7 +383,10 @@
       "type": "table"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -419,7 +434,7 @@
           "alias": "Apache",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT count(statusCode)\nFROM log\nWHERE \"key\" = 'apache' AND statusCode != 200",
           "rawQuery": true,
@@ -431,7 +446,10 @@
       "type": "stat"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -518,7 +536,7 @@
           "alias": "Nginx",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT msg, logLevel\nFROM log\nWHERE (\"key\" = 'flask') AND (time >= now() - 1h)\nORDER BY desc",
           "rawQuery": true,
@@ -530,7 +548,10 @@
       "type": "table"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "influxdb",
+        "uid": "logs"
+      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -578,7 +599,7 @@
           "alias": "flask",
           "datasource": {
             "type": "influxdb",
-            "uid": "a1IVAVAVk"
+            "uid": "logs"
           },
           "query": "SELECT count(logLevel)\nFROM log\nWHERE \"key\" = 'flask' AND logLevel = 'ERROR'",
           "rawQuery": true,
