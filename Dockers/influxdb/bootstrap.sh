@@ -4,8 +4,8 @@ RETENTION_POLICY="WITH DURATION 2h REPLICATION 1 SHARD DURATION 1h NAME d_2h_sgd
 DATABASES=("fake_log","container_metrics")
 
 IFS=','
-for db in "${DATABASES[@]}"; do
+for db in ${DATABASES[@]}; do
     influx -host localhost \
            -port 8086 \
-           -execute 'CREATE DATABASE ${db} ${RETENTION_POLICY}'
+           -execute "CREATE DATABASE ${db} ${RETENTION_POLICY}"
 done

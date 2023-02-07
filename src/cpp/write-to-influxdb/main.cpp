@@ -6,15 +6,15 @@
 
 int main()
 {
-    const std::string path = "/workspace/src/cpp/write-to-influxdb";
+    const std::string path{"/workspace/src/cpp/write-to-influxdb"};
     const auto logger{spdlog::daily_logger_st("main", path + "/logs/log.txt", 0, 0)};
 
     MQReceiver receiver{path};
     InfluxDBWriter influxdb_writer{"influxdb", 8089};
 
-    std::unique_ptr<struct MsgBuf> msg_buf;
-    std::string msg;
-    std::string data;
+    std::unique_ptr<struct MsgBuf> msg_buf{};
+    std::string msg{};
+    std::string data{};
     while (true)
     {
         receiver.recv_msg();
