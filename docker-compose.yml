@@ -146,8 +146,8 @@ services:
     environment:
       TZ: "Asia/Seoul"
     volumes:
-      - ./Dockers/grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
-      - ./Dockers/grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/
+      - ./Dockers/${GRAFANA_DASHBOARDS_PATH}:/var/lib/${GRAFANA_DASHBOARDS_PATH}
+      - ./Dockers/${GRAFANA_PROVISIONING_PATH}:/etc/${GRAFANA_PROVISIONING_PATH}
     depends_on:
       - influxdb
       - kafka-single-node
