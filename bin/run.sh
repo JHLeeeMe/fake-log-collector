@@ -9,7 +9,9 @@ if [[ -d ${PROJECT_ROOT}/tmpfs ]]; then
 fi
 
 if [[ ! -e ${PROJECT_ROOT}/.env ]]; then
-    echo "DOCKER_SOCK_GROUP=$(stat -c '%g' /var/run/docker.sock)" > ${PROJECT_ROOT}/.env
+    echo "DOCKER_SOCK_GROUP=$(stat -c '%g' /var/run/docker.sock)" >> ${PROJECT_ROOT}/.env
+    echo "GRAFANA_PROVISIONING_PATH=grafana/provisioning" >> ${PROJECT_ROOT}/.env
+    echo "GRAFANA_DASHBOARDS_PATH=grafana/dashboards" >> ${PROJECT_ROOT}/.env
 fi
 
 CMD=$1
