@@ -60,3 +60,28 @@ Flask:
 
 ### 7. Visualize InfluxDB (Using Grafana)
 Visualize `fake_log` & `container_metrics` database
+
+**Fake Logs Dashboard**
+![Fake_Logs_Dashboard](https://user-images.githubusercontent.com/31606119/218243939-5a7d2777-114e-4e7d-980c-6ac72c945da3.jpg)
+
+**Container Metrics Dashboard**
+![Container_Metrics_Dashboard](https://user-images.githubusercontent.com/31606119/218243941-869dfca0-791c-4f45-92c4-b1062724e68b.jpg)
+
+# Usage
+### 1. git clone
+```bash
+git clone https://github.com/JHLeeeMe/fake-log-collector.git
+```
+
+### 2. Run
+```bash
+cd fake-log-collector/bin
+./run.sh -d
+
+# Check
+docker-compose ps
+```
+
+### 3. Visualize with Grafana
+Access `localhost:3000` with web-browser (grafana)  
+(id: `admin`, password: `admin`)
