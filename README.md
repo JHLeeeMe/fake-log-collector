@@ -1,8 +1,8 @@
 # fake-log-collector
-![fake-log-collector-pipeline](https://user-images.githubusercontent.com/31606119/217535524-9e1f5fc5-932a-4f05-83a8-694498c94fdc.jpeg)
+![fake-log-collector-pipeline](https://user-images.githubusercontent.com/31606119/218061194-35aee0cf-bec6-4527-b578-f1132febaa49.jpeg)
 
 ### 1. log-generator -> Kafka
-Send ```random log data(Nginx, Apache, Flask)``` to kafka ```raw``` topic
+Send `random log data(Nginx, Apache, Flask)` to kafka `raw` topic
 ```python
 # Log Form e.g.
 Nginx & Apache: 
@@ -22,8 +22,8 @@ Flask:
   - [src/python/log-generator](https://github.com/JHLeeeMe/fake-log-collector/tree/master/src/python/log-generator)
 
 ### 2. Transform (Using kafka streams)
-2-1. Transform data from ```raw``` topic  
-2-2. Send to ```transformed``` topic
+  1. Transform data from `raw` topic  
+  2. Send to `transformed` topic
 ```python
 # Transformed Log Form e.g.
 Nginx & Apache:
@@ -38,16 +38,25 @@ Flask:
 ```
   - [src/java/transformer](https://github.com/JHLeeeMe/fake-log-collector/tree/master/src/java/transformer)
 
-### 3. Kafka -> Consumer
-3-1. Consume data from ```transformed``` topic  
-3-2. Send to ```message queues``` (System V ipc)
+### 3. Kafka -> Consumer -> Message Queue
+  1. Consume data from `transformed` topic  
+  2. Send to `message queues` (System V ipc)
   - [src/cpp/consumer-cpp](https://github.com/JHLeeeMe/fake-log-collector/tree/master/src/cpp/consumer-cpp)
 
-### 4. Message Queue -> Influxdb
+### 4. Message Queue -> InfluxDB
+  1. Receive data from `Message Queue`  
+  2. Write to `influxdb's fake_log db` (using udp protocol)
   - [src/cpp/write-to-influxdb](https://github.com/JHLeeeMe/fake-log-collector/tree/master/src/cpp/write-to-influxdb)
   
 ### 5. Message Queue -> Hadoop HDFS
+  1. Receive data from `Message Queue`  
+  2. Save to `Hadoop HDFS` (using webHDFS)
   - [src/cpp/save-to-hdfs](https://github.com/JHLeeeMe/fake-log-collector/tree/master/src/cpp/save-to-hdfs)
   
-### 6. Collect system metrics -> Influxdb (using Telegraf)
-6-1. 
+### 6. Collect system metrics -> Influxdb (Using Telegraf)
+  1. collect using `[[inputs.docker]]` plugin  
+  2. write to `influxdb's container_metrics db` (using `[[outputs.influxdb]]` plugin)
+  - [Dockers/telegraf/telegraf.conf](https://github.com/JHLeeeMe/fake-log-collector/blob/master/Dockers/telegraf/telegraf.conf)
+
+### 7. Visualize InfluxDB (Using Grafana)
+Visualize `fake_log` & `container_metrics` database
