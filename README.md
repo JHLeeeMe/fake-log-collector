@@ -1,4 +1,5 @@
 # fake-log-collector
+Log Generator -> Kafka  -> Consumer -> Message Queues -> InfluxDB & HDFS -> Grafana
 ![fake-log-collector-pipeline](https://user-images.githubusercontent.com/31606119/218061194-35aee0cf-bec6-4527-b578-f1132febaa49.jpeg)
 
 ### 1. log-generator -> Kafka
