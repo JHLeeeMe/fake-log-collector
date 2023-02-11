@@ -51,6 +51,7 @@ Flask:
 ### 5. Message Queue -> Hadoop HDFS
   1. Receive data from `Message Queue`  
   2. Save to `Hadoop HDFS` (using webHDFS)
+![hdfs](https://user-images.githubusercontent.com/31606119/218249342-fcaa2362-1d3a-4343-a5ca-4c4eadcaab0e.jpg)
   - [src/cpp/save-to-hdfs](https://github.com/JHLeeeMe/fake-log-collector/tree/master/src/cpp/save-to-hdfs)
   
 ### 6. Collect system metrics -> Influxdb (Using Telegraf)
