@@ -40,8 +40,6 @@ MQSender::~MQSender()
 
 void MQSender::send_msg(const char* value)
 {
-    std::string s{value};
-
     memset(&_payload, 0x00, sizeof(struct Data));
     strcpy(_payload.data, value);
 
